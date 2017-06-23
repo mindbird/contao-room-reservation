@@ -1572,3 +1572,7 @@ if ( $.ajaxPrefilter ) {
 }
 return $;
 }));
+
+$.validator.addMethod( "time", function( value, element ) {
+    return this.optional( element ) || /^([01]\d|2[0-3]|[0-9])(:[0-5]\d){1,2}$/.test( value );
+}, "Bitte geben Sie eine gültige Zeit zwischen 00:00 und 23:59 ein" );
