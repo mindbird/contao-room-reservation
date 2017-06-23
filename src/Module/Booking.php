@@ -42,6 +42,7 @@ class Booking extends Module
            $endDate = \DateTime::createFromFormat('d.m.Yh:s', Input::post('endDate'). Input::post('endTime'));
            //$result = $db->prepare("SELECT id FROM tl_calendar_events WHERE startDate <= ? AND endDate >= ?)")->execute($endDate, $startDate);
            $cem = new CalendarEventsModel();
+           $cem->pid = $this->room_event_archive;
            $cem->startDate = $startDate->format('U');
            $cem->endDate = $endDate->format('U');
            $cem->title = $user->firstname . ' ' . $user->lastname;
