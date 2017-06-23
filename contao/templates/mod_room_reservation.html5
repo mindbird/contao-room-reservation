@@ -1,0 +1,56 @@
+<?php $this->extend('block_unsearchable'); ?>
+
+<?php $this->block('content'); ?>
+<form method="post" class="room-reservation">
+    <input type="hidden" name="REQUEST_TOKEN" value="<?= REQUEST_TOKEN ?>">
+<div class="row">
+    <div class="column"><?= $this->fields['startDate']->parse() ?></div>
+    <div class="column"><?= $this->fields['startTime']->parse() ?></div>
+</div>
+<div class="row">
+    <div class="column"><?= $this->fields['endDate']->parse() ?></div>
+    <div class="column"><?= $this->fields['endTime']->parse() ?></div>
+</div>
+<div class="row">
+    <div class="column"><button>Reservieren</button></div>
+    <div class="column"></div>
+</div>
+</form>
+
+<script type="text/javascript">
+    $(function() {
+        var startDate = new Date();
+        startDate.setDate(startDate.getDate() + 1);
+        $('[name="startDate"]').datepicker({
+            language: 'de-DE',
+            autoHide: true,
+            startDate: startDate,
+            pick: function() {
+                if ($('[name="startDate"]').datepicker('getDate') > $('[name="endDate"]').datepicker('getDate')) {
+                    $('[name="endDate"]').val('');
+                }
+                $('[name="endDate"]').datepicker('setStartDate', $('[name="startDate"]').datepicker('getDate'));
+            }
+        });
+        $('[name="endDate"]').datepicker({
+            language: 'de-DE',
+            autoHide: true,
+            startDate: startDate,
+            pick: function() {
+                if ($('[name="startDate"]').datepicker('getDate') >= $('[name="endDate"]').datepicker('getDate')) {
+                    $('[name="startDate"]').val('');
+                }
+            }
+        });
+
+        $('.room-reservation').validate({
+            errorPlacement: function(error, element) {
+                element.closest('.formElement').find('.error').html(error.html());
+            },
+            success: function (error) {
+                error.remove();
+            }
+        });
+    });
+</script>
+<?php $this->endblock(); ?>
