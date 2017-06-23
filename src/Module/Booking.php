@@ -46,6 +46,9 @@ class Booking extends Module
            $cem->endDate = $endDate->format('U');
            $cem->title = $user->firstname . ' ' . $user->lastname;
            $cem->save();
+
+           $page = \Contao\PageModel::findByPk($this->jumpTo);
+           $this->jumpToOrReload($page->id);
        }
     }
 
