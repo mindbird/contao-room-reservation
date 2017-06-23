@@ -47,8 +47,7 @@ class Booking extends Module
            $cem->title = $user->firstname . ' ' . $user->lastname;
            $cem->save();
 
-           $page = \Contao\PageModel::findByPk($this->jumpTo);
-           $this->jumpToOrReload($page->id);
+           $this->jumpToOrReload($this->jumpTo);
        }
     }
 
@@ -61,31 +60,31 @@ class Booking extends Module
 
         $field = new FormTextField();
         $field->template = 'form_room_reservation_textfield';
-        $field->name = 'dateStart';
+        $field->name = 'startDate';
         $field->label = 'Startdatum';
         $field->required = true;
-        $this->fields['dateStart'] = $field;
+        $this->fields['startDate'] = $field;
 
         $field = new FormTextField();
         $field->template = 'form_room_reservation_textfield';
-        $field->name = 'timeStart';
+        $field->name = 'startTime';
         $field->label = 'Startzeit';
         $field->required = true;
-        $this->fields['timeStart'] = $field;
+        $this->fields['startTime'] = $field;
 
         $field = new FormTextField();
         $field->template = 'form_room_reservation_textfield';
-        $field->name = 'dateEnd';
+        $field->name = 'endDate';
         $field->label = 'Enddatum';
         $field->required = true;
-        $this->fields['dateEnd'] = $field;
+        $this->fields['endDate'] = $field;
 
         $field = new FormTextField();
         $field->template = 'form_room_reservation_textfield';
-        $field->name = 'timeEnd';
+        $field->name = 'endTime';
         $field->label = 'Endzeit';
         $field->required = true;
-        $this->fields['timeEnd'] = $field;
+        $this->fields['endTime'] = $field;
 
         $this->Template->fields = $this->fields;
     }
