@@ -83,5 +83,7 @@ class Booking extends Module
         $field->label = 'Endzeit';
         $field->required = true;
         $this->fields['timeEnd'] = $field;
+
+        $this->Template->fields = $this->fields;
     }
 }
