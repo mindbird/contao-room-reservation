@@ -3,6 +3,7 @@
 namespace RoomReservation\Module;
 
 use Contao\CalendarEventsModel;
+use Contao\Database;
 use Contao\FormHidden;
 use Contao\FormTextField;
 use Contao\FrontendUser;
@@ -36,22 +37,29 @@ class Booking extends Module
     {
        $this->initFields();
        $user = FrontendUser::getInstance();
+       $db = Database::getInstance();
 
        if (Input::post($this->fields['formSubmit']->name) == $this->fields['formSubmit']->value) {
            $startDate = \DateTime::createFromFormat('d.m.Yh:s', Input::post('startDate'). Input::post('startTime'));
            $endDate = \DateTime::createFromFormat('d.m.Yh:s', Input::post('endDate'). Input::post('endTime'));
-           //$result = $db->prepare("SELECT id FROM tl_calendar_events WHERE startDate <= ? AND endDate >= ?)")->execute($endDate, $startDate);
-           $cem = new CalendarEventsModel();
-           $cem->pid = $this->room_event_archive;
-           $cem->startDate = $startDate->format('U');
-           $cem->startTime = $startDate->format('U');
-           $cem->endDate = $endDate->format('U');
-           $cem->endTime = $endDate->format('U');
-           $cem->title = $user->firstname . ' ' . $user->lastname;
-           $cem->published = true;
-           $cem->save();
+           $result = $db->prepare("SELECT id FROM tl_calendar_events WHERE startDate <= ? AND endDate >= ? AND pid = ?")->execute($endDate + 30*60, $startDate, $this->room_event_archive);
+           var_dump($result);
+           if (!$result) {
+               $cem = new CalendarEventsModel();
+               $cem->pid = $this->room_event_archive;
+               $cem->startDate = $startDate->format('U');
+               $cem->startTime = $startDate->format('U');
+               $cem->endDate = $endDate->format('U');
+               $cem->endTime = $endDate->format('U');
+               $cem->title = $user->firstname . ' ' . $user->lastname;
+               $cem->published = true;
+               $cem->save();
 
-           $this->jumpToOrReload($this->jumpTo);
+               $this->jumpToOrReload($this->jumpTo);
+           } else {
+               $this->Template->noTimeslotAvailable = true;
+           }
+
        }
     }
 

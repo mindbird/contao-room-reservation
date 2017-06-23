@@ -18,6 +18,10 @@
     </div>
 </form>
 
+<?php if ($this->noTimeslotAvailable): ?>
+    <p>In dem angegebenen Zeitraum ist kein freier Raum verfügbar.</p>
+<?php endif; ?>
+
 <script type="text/javascript">
     $(function() {
         var startDate = new Date();
