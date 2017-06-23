@@ -10,6 +10,7 @@ namespace RoomReservation\Module;
  */
 class Booking extends \Contao\Module
 {
+    protected $strTemplate = 'mod_room_reservation';
 
     protected $fields = array();
 
