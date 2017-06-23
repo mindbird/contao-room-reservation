@@ -38,7 +38,7 @@
             autoHide: true,
             startDate: startDate,
             pick: function() {
-                if ($('[name="startDate"]').datepicker('getDate') >= $('[name="endDate"]').datepicker('getDate')) {
+                if ($('[name="startDate"]').datepicker('getDate') > $('[name="endDate"]').datepicker('getDate')) {
                     $('[name="startDate"]').val('');
                 }
             }
