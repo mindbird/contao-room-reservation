@@ -2,19 +2,20 @@
 
 <?php $this->block('content'); ?>
 <form method="post" class="room-reservation">
+    <?= $this->fields['formSubmit']->parse() ?>
     <input type="hidden" name="REQUEST_TOKEN" value="<?= REQUEST_TOKEN ?>">
-<div class="row">
-    <div class="column"><?= $this->fields['startDate']->parse() ?></div>
-    <div class="column"><?= $this->fields['startTime']->parse() ?></div>
-</div>
-<div class="row">
-    <div class="column"><?= $this->fields['endDate']->parse() ?></div>
-    <div class="column"><?= $this->fields['endTime']->parse() ?></div>
-</div>
-<div class="row">
-    <div class="column"><button>Reservieren</button></div>
-    <div class="column"></div>
-</div>
+    <div class="row">
+        <div class="column"><?= $this->fields['startDate']->parse() ?></div>
+        <div class="column"><?= $this->fields['startTime']->parse() ?></div>
+    </div>
+    <div class="row">
+        <div class="column"><?= $this->fields['endDate']->parse() ?></div>
+        <div class="column"><?= $this->fields['endTime']->parse() ?></div>
+    </div>
+    <div class="row">
+        <div class="column"><button>Reservieren</button></div>
+        <div class="column"></div>
+    </div>
 </form>
 
 <script type="text/javascript">
