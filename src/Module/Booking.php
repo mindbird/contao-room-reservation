@@ -70,7 +70,7 @@ class Booking extends Module
         $this->fields['startDate'] = $field;
 
         $field = new FormTextField();
-        $field->addAttribute('data-rule-time', true);
+        $field->addAttribute('data-rule-time', 'true');
         $field->type = 'time';
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'startTime';
@@ -86,7 +86,7 @@ class Booking extends Module
         $this->fields['endDate'] = $field;
 
         $field = new FormTextField();
-        $field->addAttribute('data-rule-time', true);
+        $field->addAttribute('data-rule-time', 'true');
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'endTime';
         $field->label = 'Endzeit';
