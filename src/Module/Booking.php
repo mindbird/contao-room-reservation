@@ -44,7 +44,9 @@ class Booking extends Module
            $cem = new CalendarEventsModel();
            $cem->pid = $this->room_event_archive;
            $cem->startDate = $startDate->format('U');
+           $cem->startTime = $startDate->format('U');
            $cem->endDate = $endDate->format('U');
+           $cem->endTime = $endDate->format('U');
            $cem->title = $user->firstname . ' ' . $user->lastname;
            $cem->save();
 
@@ -63,28 +65,28 @@ class Booking extends Module
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'startDate';
         $field->label = 'Startdatum';
-        $field->required = true;
+        $field->mandatory = true;
         $this->fields['startDate'] = $field;
 
         $field = new FormTextField();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'startTime';
         $field->label = 'Startzeit';
-        $field->required = true;
+        $field->mandatory = true;
         $this->fields['startTime'] = $field;
 
         $field = new FormTextField();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'endDate';
         $field->label = 'Enddatum';
-        $field->required = true;
+        $field->mandatory = true;
         $this->fields['endDate'] = $field;
 
         $field = new FormTextField();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'endTime';
         $field->label = 'Endzeit';
-        $field->required = true;
+        $field->mandatory = true;
         $this->fields['endTime'] = $field;
 
         $this->Template->fields = $this->fields;
