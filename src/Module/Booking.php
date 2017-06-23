@@ -35,24 +35,28 @@ class Booking extends \Contao\Module
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'dateStart';
         $field->label = 'Startdatum';
+        $field->required = true;
         $this->fields['dateStart'] = $field;
 
         $field = new \Contao\FormTextField();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'timeStart';
         $field->label = 'Startzeit';
+        $field->required = true;
         $this->fields['timeStart'] = $field;
 
         $field = new \Contao\FormTextField();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'dateEnd';
         $field->label = 'Enddatum';
+        $field->required = true;
         $this->fields['dateEnd'] = $field;
 
         $field = new \Contao\FormTextField();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'timeEnd';
         $field->label = 'Endzeit';
+        $field->required = true;
         $this->fields['timeEnd'] = $field;
     }
 }
