@@ -13,4 +13,4 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['room_event_archive'] = array(
     'sql' => "int(10) unsigned NOT NULL default '0'"
 );
 
-$GLOBALS['TL_DCA']['tl_module']['palettes']['room_reservation'] = '{title_legend},name,headline,type;{archiv_legend},room_event_archive;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['room_reservation'] = '{title_legend},name,headline,type;{archiv_legend},room_event_archive,jumpTo;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
