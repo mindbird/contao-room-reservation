@@ -59,6 +59,9 @@ class Booking extends Module
                $this->Template->noTimeslotAvailable = true;
            }
 
+       } elseif (Input::get('date') != '') {
+           $this->fields['startDate']->value = Input::get('date');
+           $this->fields['endDate']->value = Input::get('date');
        }
     }
 
