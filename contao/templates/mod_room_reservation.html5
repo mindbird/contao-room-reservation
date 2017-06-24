@@ -13,7 +13,15 @@
         <div class="column"><?= $this->fields['endTime']->parse() ?></div>
     </div>
     <div class="row">
-        <div class="column"><button>Reservieren</button></div>
+        <div class="column"><button id="calcPrice">Preis berechnen</button></div>
+        <div class="column"></div>
+    </div>
+    <div class="row price">
+        <div class="column"><span></span>,00 EUR</div>
+        <div class="column"></div>
+    </div>
+    <div class="row booking">
+        <div class="column"><button>Verfügbarkeit prüfen und reservieren</button></div>
         <div class="column"></div>
     </div>
 </form>
@@ -56,6 +64,67 @@
                 error.remove();
             }
         });
+
+        $('#calcPrice').click(function(e) {
+            e.preventDefault();
+            calcPrice();
+        });
+
+        function calcPrice() {
+            if ($('.room-reservation').valid()) {
+                var startDate = new Date(parseDate($('[name="startDate"]').val() + ' ' + $('[name="startTime"]').val()));
+                var endDate = new Date(parseDate($('[name="endDate"]').val() + ' ' + $('[name="endTime"]').val()));
+                var difference = (endDate - startDate) / (60 * 1000);
+                var startTime = $('[name="startTime"]').val().split(':');
+                var endTime = $('[name="endTime"]').val().split(':');
+                var price = 0;
+
+                if ($('[name="startDate"]').val() == $('[name="endDate"]').val()) {
+                    price = calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTime[0] + '.' + startTime[1]));
+
+                } else {
+                    price = calcDay(21.0 - parseFloat(startTime[0] + '.' + startTime[1]));
+                    price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - 8.0);
+                    // @ TODO weitere Tage voll berechnen
+                }
+
+                $('.price span').html(price.toLocaleString('de-DE'));
+                $('.price').show();
+                $('.booking').show();
+            }
+
+        }
+
+        var dayPrice = 85;
+        var halfDayPrice = 50;
+        var hourPrice = 14;
+        var halfHourPrice = 8;
+
+        function calcDay(time) {
+            var rest = time % 1;
+            var restPrice = 0;
+            if (rest != 0) {
+                restPrice = halfHourPrice
+            }
+            if (time >= 8) {
+                return dayPrice;
+            } else if (time < 8 && time > 5) {
+                return halfDayPrice + (time - 5 - rest) * hourPrice + restPrice;
+            } else if (time == 5) {
+                return halfDayPrice;
+            } else if (time < 5) {
+                return (time - rest) * hourPrice + restPrice
+            }
+        }
+
+        function parseDate(input) {
+            var parts = input.match(/(\d+)/g);
+            // note parts[1]-1
+            return new Date(Date.UTC(parts[2], parts[1]-1, parts[0], parts[3], parts[4], 0));
+        }
+
+        $('.price').hide();
+        $('.booking').hide();
     });
 </script>
 <?php $this->endblock(); ?>

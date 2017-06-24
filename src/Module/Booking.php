@@ -5,6 +5,7 @@ namespace RoomReservation\Module;
 use Contao\CalendarEventsModel;
 use Contao\Database;
 use Contao\FormHidden;
+use Contao\FormSelectMenu;
 use Contao\FormTextField;
 use Contao\FrontendUser;
 use Contao\Module;
@@ -60,13 +61,21 @@ class Booking extends Module
            }
 
        } elseif (Input::get('date') != '') {
-           $this->fields['startDate']->value = Input::get('date');
-           $this->fields['endDate']->value = Input::get('date');
+           $date = substr(Input::get('date'), 6,2) . '.' . substr(Input::get('date'), 4,2) . '.' . substr(Input::get('date'), 0,4);
+           $this->fields['startDate']->value = $date;
+           $this->fields['endDate']->value = $date;
        }
     }
 
     protected function initFields()
     {
+
+        $timeslot = array();
+        for($i = 8; $i <= 20; $i++) {
+            $timeslot[] = array('label' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':00', 'value' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':00');
+            $timeslot[] = array('label' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':30', 'value' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':30');
+        }
+
         $field = new FormHidden();
         $field->name = 'FORM_SUBMIT';
         $field->value = 'room_reservation_booking_' . $this->id;
@@ -79,13 +88,13 @@ class Booking extends Module
         $field->mandatory = true;
         $this->fields['startDate'] = $field;
 
-        $field = new FormTextField();
-        $field->addAttribute('data-rule-time', 'true');
+        $field = new FormSelectMenu();
         $field->type = 'time';
-        $field->template = 'form_room_reservation_textfield';
+        //$field->template = 'form_room_reservation_textfield';
         $field->name = 'startTime';
         $field->label = 'Startzeit';
         $field->mandatory = true;
+        $field->options = $timeslot;
         $this->fields['startTime'] = $field;
 
         $field = new FormTextField();
@@ -95,12 +104,13 @@ class Booking extends Module
         $field->mandatory = true;
         $this->fields['endDate'] = $field;
 
-        $field = new FormTextField();
+        $field = new FormSelectMenu();
         $field->addAttribute('data-rule-time', 'true');
-        $field->template = 'form_room_reservation_textfield';
+        //$field->template = 'form_room_reservation_textfield';
         $field->name = 'endTime';
         $field->label = 'Endzeit';
         $field->mandatory = true;
+        $field->options = $timeslot;
         $this->fields['endTime'] = $field;
 
         $this->Template->fields = $this->fields;
