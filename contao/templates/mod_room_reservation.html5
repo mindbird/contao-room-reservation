@@ -74,7 +74,6 @@
             if ($('.room-reservation').valid()) {
                 var startDate = new Date(parseDate($('[name="startDate"]').val() + ' ' + $('[name="startTime"]').val()));
                 var endDate = new Date(parseDate($('[name="endDate"]').val() + ' ' + $('[name="endTime"]').val()));
-                var difference = (endDate - startDate) / (60 * 1000);
                 var startTime = $('[name="startTime"]').val().split(':');
                 var endTime = $('[name="endTime"]').val().split(':');
                 var price = 0;
@@ -83,9 +82,9 @@
                     price = calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTime[0] + '.' + startTime[1]));
 
                 } else {
-                    price = calcDay(21.0 - parseFloat(startTime[0] + '.' + startTime[1]));
-                    price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - 8.0);
-                    // @ TODO weitere Tage voll berechnen
+                    price = calcDay(parseFloat('<?= $this->endTime ?>') - parseFloat(startTime[0] + '.' + startTime[1]));
+                    price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat('<?= $this->startTime ?>'));
+                    price += (Math.round(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24 )) - 2) * dayPrice;
                 }
 
                 $('.price span').html(price.toLocaleString('de-DE'));
@@ -95,10 +94,10 @@
 
         }
 
-        var dayPrice = 85;
-        var halfDayPrice = 50;
-        var hourPrice = 14;
-        var halfHourPrice = 8;
+        var dayPrice = parseFloat('<?= $this->priceDay ?>');
+        var halfDayPrice = parseFloat('<?= $this->priceHalfDay ?>');
+        var hourPrice = parseFloat('<?= $this->priceHour ?>');
+        var halfHourPrice = parseFloat('<?= $this->priceHalfHour ?>');
 
         function calcDay(time) {
             var rest = time % 1;

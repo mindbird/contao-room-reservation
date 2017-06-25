@@ -35,44 +35,61 @@ class Booking extends Module
 
     public function compile()
     {
-       $this->initFields();
-       $user = FrontendUser::getInstance();
-       $db = Database::getInstance();
+        $this->initFields();
+        $user = FrontendUser::getInstance();
+        $db = Database::getInstance();
 
-       if (Input::post($this->fields['formSubmit']->name) == $this->fields['formSubmit']->value) {
-           $startDate = \DateTime::createFromFormat('d.m.YH:s', Input::post('startDate') . Input::post('startTime'));
-           $endDate = \DateTime::createFromFormat('d.m.YH:s', Input::post('endDate') . Input::post('endTime'));
-           $result = $db->prepare("SELECT id FROM tl_calendar_events WHERE startDate <= ? AND endDate >= ? AND pid = ?")->execute($endDate->format('U') + 30*60, $startDate->format('U'), $this->room_event_archive);
-           if ($result->numRows == 0) {
-               $cem = new CalendarEventsModel();
-               $cem->pid = $this->room_event_archive;
-               $cem->startDate = $startDate->format('U');
-               $cem->startTime = $startDate->format('U');
-               $cem->endDate = $endDate->format('U');
-               $cem->endTime = $endDate->format('U');
-               $cem->title = $user->firstname . ' ' . $user->lastname;
-               $cem->published = true;
-               $cem->save();
+        if (Input::post($this->fields['formSubmit']->name) == $this->fields['formSubmit']->value) {
+            $startDate = \DateTime::createFromFormat('d.m.YH:s', Input::post('startDate') . Input::post('startTime'));
+            $endDate = \DateTime::createFromFormat('d.m.YH:s', Input::post('endDate') . Input::post('endTime'));
+            $result = $db->prepare("SELECT id FROM tl_calendar_events WHERE startDate <= ? AND endDate >= ? AND pid = ?")->execute($endDate->format('U') + 30 * 60,
+                $startDate->format('U'), $this->room_event_archive);
+            if ($result->numRows == 0) {
+                $cem = new CalendarEventsModel();
+                $cem->pid = $this->room_event_archive;
+                $cem->startDate = $startDate->format('U');
+                $cem->startTime = $startDate->format('U');
+                $cem->endDate = $endDate->format('U');
+                $cem->endTime = $endDate->format('U');
+                $cem->title = $user->firstname . ' ' . $user->lastname;
+                $cem->published = true;
+                $cem->save();
 
-               $this->jumpToOrReload($this->jumpTo);
-           } else {
-               $this->Template->noTimeslotAvailable = true;
-           }
+                $this->jumpToOrReload($this->jumpTo);
+            } else {
+                $this->Template->noTimeslotAvailable = true;
+            }
 
-       } elseif (Input::get('date') != '') {
-           $date = substr(Input::get('date'), 6,2) . '.' . substr(Input::get('date'), 4,2) . '.' . substr(Input::get('date'), 0,4);
-           $this->fields['startDate']->value = $date;
-           $this->fields['endDate']->value = $date;
-       }
+        } elseif (Input::get('date') != '') {
+            $date = substr(Input::get('date'), 6, 2) . '.' . substr(Input::get('date'), 4,
+                    2) . '.' . substr(Input::get('date'), 0, 4);
+            $this->fields['startDate']->value = $date;
+            $this->fields['endDate']->value = $date;
+        }
+
+        $this->Template->priceDay = $this->room_reservation_price_day;
+        $this->Template->priceHalfDay = $this->room_reservation_price_half_day;
+        $this->Template->priceHour = $this->room_reservation_price_hour;
+        $this->Template->priceHalfHour = $this->room_reservation_price_half_hour;
+        $this->Template->startTime = $this->room_reservation_start_time;
+        $this->Template->endTime = $this->room_reservation_end_time;
     }
 
     protected function initFields()
     {
 
         $timeslot = array();
-        for($i = 8; $i <= 20; $i++) {
-            $timeslot[] = array('label' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':00', 'value' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':00');
-            $timeslot[] = array('label' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':30', 'value' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':30');
+        for ($i = $this->room_reservation_start_time; $i <= $this->room_reservation_end_time; $i++) {
+            $timeslot[] = array(
+                'label' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':00',
+                'value' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':00'
+            );
+            if ($i != $this->room_reservation_end_time) {
+                $timeslot[] = array(
+                    'label' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':30',
+                    'value' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':30'
+                );
+            }
         }
 
         $field = new FormHidden();
