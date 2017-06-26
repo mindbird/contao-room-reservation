@@ -349,22 +349,20 @@
         },
 
         messages: {
-            required: "This field is required.",
-            remote: "Please fix this field.",
-            email: "Please enter a valid email address.",
-            url: "Please enter a valid URL.",
-            date: "Please enter a valid date.",
-            dateISO: "Please enter a valid date (ISO).",
-            number: "Please enter a valid number.",
-            digits: "Please enter only digits.",
-            equalTo: "Please enter the same value again.",
-            maxlength: $.validator.format("Please enter no more than {0} characters."),
-            minlength: $.validator.format("Please enter at least {0} characters."),
-            rangelength: $.validator.format("Please enter a value between {0} and {1} characters long."),
-            range: $.validator.format("Please enter a value between {0} and {1}."),
-            max: $.validator.format("Please enter a value less than or equal to {0}."),
-            min: $.validator.format("Please enter a value greater than or equal to {0}."),
-            step: $.validator.format("Please enter a multiple of {0}.")
+            required: "Dieses Feld ist ein Pflichtfeld.",
+            maxlength: $.validator.format("Geben Sie bitte maximal {0} Zeichen ein."),
+            minlength: $.validator.format("Geben Sie bitte mindestens {0} Zeichen ein."),
+            rangelength: $.validator.format("Geben Sie bitte mindestens {0} und maximal {1} Zeichen ein."),
+            email: "Geben Sie bitte eine gültige E-Mail Adresse ein.",
+            url: "Geben Sie bitte eine gültige URL ein.",
+            date: "Bitte geben Sie ein gültiges Datum ein.",
+            number: "Geben Sie bitte eine Nummer ein.",
+            digits: "Geben Sie bitte nur Ziffern ein.",
+            equalTo: "Bitte denselben Wert wiederholen.",
+            range: $.validator.format("Geben Sie bitte einen Wert zwischen {0} und {1} ein."),
+            max: $.validator.format("Geben Sie bitte einen Wert kleiner oder gleich {0} ein."),
+            min: $.validator.format("Geben Sie bitte einen Wert größer oder gleich {0} ein."),
+            creditcard: "Geben Sie bitte eine gültige Kreditkarten-Nummer ein."
         },
 
         autoCreateRanges: false,
@@ -1575,26 +1573,3 @@
     }
     return $;
 }));
-
-/*
- * Translated default messages for the jQuery validation plugin.
- * Locale: DE (German, Deutsch)
- */
-$(function () {
-    $.extend($.validator.messages, {
-        required: "Dieses Feld ist ein Pflichtfeld.",
-        maxlength: $.validator.format("Geben Sie bitte maximal {0} Zeichen ein."),
-        minlength: $.validator.format("Geben Sie bitte mindestens {0} Zeichen ein."),
-        rangelength: $.validator.format("Geben Sie bitte mindestens {0} und maximal {1} Zeichen ein."),
-        email: "Geben Sie bitte eine gültige E-Mail Adresse ein.",
-        url: "Geben Sie bitte eine gültige URL ein.",
-        date: "Bitte geben Sie ein gültiges Datum ein.",
-        number: "Geben Sie bitte eine Nummer ein.",
-        digits: "Geben Sie bitte nur Ziffern ein.",
-        equalTo: "Bitte denselben Wert wiederholen.",
-        range: $.validator.format("Geben Sie bitte einen Wert zwischen {0} und {1} ein."),
-        max: $.validator.format("Geben Sie bitte einen Wert kleiner oder gleich {0} ein."),
-        min: $.validator.format("Geben Sie bitte einen Wert größer oder gleich {0} ein."),
-        creditcard: "Geben Sie bitte eine gültige Kreditkarten-Nummer ein."
-    });
-});
