@@ -53,6 +53,7 @@ class Booking extends Module
                 $cem->endTime = $endDate->format('U');
                 $cem->title = $user->firstname . ' ' . $user->lastname;
                 $cem->published = true;
+                $cem->addTime = true;
                 $cem->save();
 
                 $this->jumpToOrReload($this->jumpTo);
