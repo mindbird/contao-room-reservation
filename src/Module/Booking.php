@@ -103,15 +103,16 @@ class Booking extends Module
         $field->name = 'startDate';
         $field->label = 'Startdatum';
         $field->mandatory = true;
+        $field->value = Input::post('startDate');
         $this->fields['startDate'] = $field;
 
         $field = new FormSelectMenu();
-        $field->type = 'time';
         $field->template = 'form_room_reservation_select';
         $field->name = 'startTime';
         $field->label = 'Startzeit';
         $field->mandatory = true;
         $field->options = $timeslot;
+        $field->value = Input::post('startTime');
         $this->fields['startTime'] = $field;
 
         $field = new FormTextField();
@@ -119,6 +120,7 @@ class Booking extends Module
         $field->name = 'endDate';
         $field->label = 'Enddatum';
         $field->mandatory = true;
+        $field->value = Input::post('endDate');
         $this->fields['endDate'] = $field;
 
         $field = new FormSelectMenu();
@@ -127,6 +129,7 @@ class Booking extends Module
         $field->label = 'Endzeit';
         $field->mandatory = true;
         $field->options = $timeslot;
+        $field->value = Input::post('endTime');
         $this->fields['endTime'] = $field;
 
         $this->Template->fields = $this->fields;
