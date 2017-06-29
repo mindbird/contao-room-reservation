@@ -64,7 +64,10 @@
                 error.remove();
             },
             rules: {
-                startDate: 'required',
+                startDate: {
+                    required: true,
+                    dateInFuture: true
+                },
                 endDate: 'required',
                 startTime: 'required',
                 endTime: {

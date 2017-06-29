@@ -1588,6 +1588,12 @@ $.validator.addMethod( "greaterThan", function (value, element, param) {
     return endTime > startTime;
 }, "Bitte überprüfen Sie den angegebenen Zeitraum" );
 
+$.validator.addMethod( "dateInFuture", function (value, element) {
+    // Bind to the blur event of the target in order to revalidate whenever the target field is updated
+    var date = parseDate(value + ' 00:00');
+    return date > new Date();
+}, "Das Datum muss in der Zukunft liegen" );
+
 function parseDate(input) {
     var parts = input.match(/(\d+)/g);
     // note parts[1]-1
