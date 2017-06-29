@@ -1573,3 +1573,23 @@
     }
     return $;
 }));
+
+$.validator.addMethod( "greaterThan", function (value, element, param) {
+    // Bind to the blur event of the target in order to revalidate whenever the target field is updated
+    var target = $('[name=' + param[0] + ']');
+    if (this.settings.onfocusout && target.not(".validate-greaterThan-blur").length) {
+        target.addClass("validate-greaterThan-blur").on("blur.validate-greaterThan", function () {
+            $(element).valid();
+        });
+    }
+    var startTime = parseDate($('[name=' + param[1] + ']').val() + ' ' + target.val());
+    var endTime = parseDate($('[name=' + param[2] + ']').val() + ' ' + value);
+
+    return endTime > startTime;
+}, "Bitte überprüfen Sie den angegebenen Zeitraum" );
+
+function parseDate(input) {
+    var parts = input.match(/(\d+)/g);
+    // note parts[1]-1
+    return new Date(Date.UTC(parts[2], parts[1]-1, parts[0], parts[3], parts[4], 0));
+}

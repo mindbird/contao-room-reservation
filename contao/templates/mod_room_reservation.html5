@@ -58,10 +58,19 @@
 
         $('.room-reservation').validate({
             errorPlacement: function(error, element) {
-                element.closest('.formElement').find('.error').html(error.html());
+                element.closest('.formElement').find('div.error').html(error.html());
             },
             success: function (error) {
                 error.remove();
+            },
+            rules: {
+                startDate: 'required',
+                endDate: 'required',
+                startTime: 'required',
+                endTime: {
+                    required: true,
+                    greaterThan: ['startTime', 'startDate', 'endDate'],
+                }
             }
         });
 
@@ -72,8 +81,8 @@
 
         function calcPrice() {
             if ($('.room-reservation').valid()) {
-                var startDate = new Date(parseDate($('[name="startDate"]').val() + ' ' + $('[name="startTime"]').val()));
-                var endDate = new Date(parseDate($('[name="endDate"]').val() + ' ' + $('[name="endTime"]').val()));
+                var startDate = parseDate($('[name="startDate"]').val() + ' ' + $('[name="startTime"]').val());
+                var endDate = parseDate($('[name="endDate"]').val() + ' ' + $('[name="endTime"]').val());
                 var startTime = $('[name="startTime"]').val().split(':');
                 var endTime = $('[name="endTime"]').val().split(':');
                 var price = 0;
@@ -114,12 +123,6 @@
             } else if (time < 5) {
                 return (time - rest) * hourPrice + restPrice
             }
-        }
-
-        function parseDate(input) {
-            var parts = input.match(/(\d+)/g);
-            // note parts[1]-1
-            return new Date(Date.UTC(parts[2], parts[1]-1, parts[0], parts[3], parts[4], 0));
         }
 
         $('.price').hide();
