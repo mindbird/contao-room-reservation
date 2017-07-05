@@ -13,7 +13,8 @@
   ],
   "require": {
     "contao/core-bundle": "~3.2 || ~4.0",
-    "contao-community-alliance/composer-plugin": "~2.4 || ~3.0"
+    "contao-community-alliance/composer-plugin": "~2.4 || ~3.0",
+    "terminal42/notification_center": "~1.0"
   },
   "extra": {
     "contao": {
