@@ -57,8 +57,6 @@ class Booking extends Module
                 $cem->addTime = true;
                 $cem->member = $user->id;
                 $cem->save();
-                dump($cem);
-                die();
 
                 $this->jumpToOrReload($this->jumpTo);
             } else {
