@@ -99,7 +99,8 @@
                 endTime: {
                     required: true,
                     greaterThan: ['startTime', 'startDate', 'endDate']
-                }
+                },
+                agb: 'required',
             }
         });
 

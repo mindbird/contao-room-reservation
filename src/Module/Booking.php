@@ -152,7 +152,7 @@ class Booking extends Module
         $field->name = 'agb';
         $field->value = Input::post('agb');
         $field->options = array(
-            array('value' => 'Hiermit stimme ich den AGB zu', 'label' => $label)
+            array('value' => 'Hiermit stimme ich den AGB zu', 'label' => $label, 'mandatory' => true)
         );
         $field->mandatory = true;
         $this->fields['agb'] = $field;
