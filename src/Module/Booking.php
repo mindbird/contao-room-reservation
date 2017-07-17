@@ -55,7 +55,10 @@ class Booking extends Module
                 $cem->title = Input::post('eventTitle');
                 $cem->published = true;
                 $cem->addTime = true;
+                $cem->member = $user->id;
                 $cem->save();
+                dump($cem);
+                die();
 
                 $this->jumpToOrReload($this->jumpTo);
             } else {
@@ -97,6 +100,7 @@ class Booking extends Module
         $this->fields['formSubmit'] = $field;
 
         $field = new FormTextField();
+        $field->template = 'form_room_reservation_textfield';
         $field->name = 'eventTitle';
         $field->label = 'Titel der Veranstaltung';
         $field->value = Input::post('startDate');
@@ -144,11 +148,13 @@ class Booking extends Module
             $label = 'Hiermit stimme ich den AGB zu';
         }
         $field = new FormCheckBox();
+        $field->template = 'form_room_reservation_checkbox';
         $field->name = 'agb';
         $field->value = Input::post('agb');
         $field->options = array(
             array('value' => 'Hiermit stimme ich den AGB zu', 'label' => $label)
         );
+        $field->mandatory = true;
         $this->fields['agb'] = $field;
 
         $this->Template->fields = $this->fields;
