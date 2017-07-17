@@ -14,3 +14,6 @@ $GLOBALS['TL_LANG']['tl_module']['room_reservation_price_half_hour'] = array('Pr
 $GLOBALS['TL_LANG']['tl_module']['room_reservation_price_hour'] = array('Preis pro Stunde');
 $GLOBALS['TL_LANG']['tl_module']['room_reservation_price_half_day'] = array('Preis halber Tag');
 $GLOBALS['TL_LANG']['tl_module']['room_reservation_price_day'] = array('Preis pro Tag');
+$GLOBALS['TL_LANG']['tl_module']['room_reservation_time_between_entries'] = array('Zeit zwischen zwei Einträgen', 'Wie viele Minuten soll der Raum frei bleiben?');
+$GLOBALS['TL_LANG']['tl_module']['room_reservation_min_booking_time'] = array('Mindestbuchdauer', 'Wie viele Minuten muss der Raum mindestens gebucht werden?');
+$GLOBALS['TL_LANG']['tl_module']['room_reservation_page_agb'] = array('Seite AGB', 'Wo befinden sich die AGB?');

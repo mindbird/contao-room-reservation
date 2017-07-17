@@ -4,6 +4,7 @@ namespace RoomReservation\Module;
 
 use Contao\CalendarEventsModel;
 use Contao\Database;
+use Contao\FormCheckBox;
 use Contao\FormHidden;
 use Contao\FormSelectMenu;
 use Contao\FormTextField;
@@ -42,7 +43,7 @@ class Booking extends Module
         if (Input::post($this->fields['formSubmit']->name) == $this->fields['formSubmit']->value) {
             $startDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('startDate') . Input::post('startTime'));
             $endDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('endDate') . Input::post('endTime'));
-            $result = $db->prepare("SELECT id FROM tl_calendar_events WHERE startTime <= ? AND endTime >= ? AND pid = ?")->execute($endDate->format('U') + 30 * 60,
+            $result = $db->prepare("SELECT id FROM tl_calendar_events WHERE startTime <= ? AND endTime >= ? AND pid = ?")->execute($endDate->format('U') + $this->room_reservation_time_between_entries * 60,
                 $startDate->format('U'), $this->room_event_archive);
             if ($result->numRows == 0) {
                 $cem = new CalendarEventsModel();
@@ -51,7 +52,7 @@ class Booking extends Module
                 $cem->startTime = $startDate->format('U');
                 $cem->endDate = $endDate->format('U');
                 $cem->endTime = $endDate->format('U');
-                $cem->title = $user->firstname . ' ' . $user->lastname;
+                $cem->title = Input::post('eventTitle');
                 $cem->published = true;
                 $cem->addTime = true;
                 $cem->save();
@@ -74,6 +75,7 @@ class Booking extends Module
         $this->Template->priceHalfHour = $this->room_reservation_price_half_hour;
         $this->Template->startTime = $this->room_reservation_start_time;
         $this->Template->endTime = $this->room_reservation_end_time;
+        $this->Template->minBookingTime = $this->room_reservation_min_booking_time;
     }
 
     protected function initFields()
@@ -81,15 +83,11 @@ class Booking extends Module
 
         $timeslot = array();
         for ($i = $this->room_reservation_start_time; $i <= $this->room_reservation_end_time; $i++) {
-            $timeslot[] = array(
-                'label' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':00',
-                'value' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':00'
-            );
+            $timeslot[] = $this->addTimeslotarray($i, '00');
+            $timeslot[] = $this->addTimeslotarray($i, '15');
+            $timeslot[] = $this->addTimeslotarray($i, '30');
             if ($i != $this->room_reservation_end_time) {
-                $timeslot[] = array(
-                    'label' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':30',
-                    'value' => str_pad($i, 2, 0, STR_PAD_LEFT) . ':30'
-                );
+                $timeslot[] = $this->addTimeslotarray($i, '45');
             }
         }
 
@@ -97,6 +95,12 @@ class Booking extends Module
         $field->name = 'FORM_SUBMIT';
         $field->value = 'room_reservation_booking_' . $this->id;
         $this->fields['formSubmit'] = $field;
+
+        $field = new FormTextField();
+        $field->name = 'eventTitle';
+        $field->label = 'Titel der Veranstaltung';
+        $field->value = Input::post('startDate');
+        $this->fields['eventTitle'] = $field;
 
         $field = new FormTextField();
         $field->template = 'form_room_reservation_textfield';
@@ -132,6 +136,29 @@ class Booking extends Module
         $field->value = Input::post('endTime');
         $this->fields['endTime'] = $field;
 
+        $pageAgbModel = \PageModel::findByPk($this->room_reservation_page_agb);
+        if ($pageAgbModel) {
+            $pageAgb = self::generateFrontendUrl($pageAgbModel->row());
+            $label = 'Hiermit stimme ich den <a href="' . $pageAgb . '" target="_blank">AGB</a> zu';
+        } else {
+            $label = 'Hiermit stimme ich den AGB zu';
+        }
+        $field = new FormCheckBox();
+        $field->name = 'agb';
+        $field->value = Input::post('agb');
+        $field->options = array(
+            array('value' => 'Hiermit stimme ich den AGB zu', 'label' => $label)
+        );
+        $this->fields['agb'] = $field;
+
         $this->Template->fields = $this->fields;
+    }
+
+    private function addTimeslotarray($hour, $minute)
+    {
+        return array(
+            'label' => str_pad($hour, 2, 0, STR_PAD_LEFT) . ':' . $minute,
+            'value' => str_pad($hour, 2, 0, STR_PAD_LEFT) . ':' . $minute
+        );
     }
 }

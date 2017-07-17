@@ -79,5 +79,38 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_price_day'] = array(
     'sql' => "int(10) unsigned NOT NULL default '0'"
 );
 
+$GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_time_between_entries'] = array(
+    'label' => &$GLOBALS['TL_LANG']['tl_module']['room_reservation_time_between_entries'],
+    'inputType' => 'text',
+    'eval' => array(
+        'mandatory' => true,
+        'tl_class' => 'w50',
+        'rgxp' => 'digit'
+    ),
+    'sql' => "int(10) unsigned NOT NULL default '0'"
+);
 
-$GLOBALS['TL_DCA']['tl_module']['palettes']['room_reservation'] = '{title_legend},name,headline,type;{archiv_legend},room_event_archive,jumpTo,room_reservation_start_time,room_reservation_end_time,room_reservation_price_half_hour,room_reservation_price_hour,room_reservation_price_half_day,room_reservation_price_day;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
+$GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_min_booking_time'] = array(
+    'label' => &$GLOBALS['TL_LANG']['tl_module']['room_reservation_min_booking_time'],
+    'inputType' => 'text',
+    'eval' => array(
+        'mandatory' => true,
+        'tl_class' => 'w50',
+        'rgxp' => 'digit'
+    ),
+    'sql' => "int(10) unsigned NOT NULL default '0'"
+);
+
+$GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_page_agb'] = array(
+    'label' => &$GLOBALS['TL_LANG']['tl_module']['room_reservation_page_agb'],
+    'inputType' => 'pageTree',
+    'eval' => array(
+        'mandatory' => true,
+        'tl_class' => 'clr',
+        'fieldType' => 'radio',
+    ),
+    'sql' => "blob NULL"
+);
+
+
+$GLOBALS['TL_DCA']['tl_module']['palettes']['room_reservation'] = '{title_legend},name,headline,type;{archiv_legend},room_event_archive,jumpTo,room_reservation_start_time,room_reservation_end_time,room_reservation_price_half_hour,room_reservation_price_hour,room_reservation_price_half_day,room_reservation_price_day,room_reservation_time_between_entries,room_reservation_min_booking_time,room_reservation_page_agb;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
