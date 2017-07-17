@@ -22,7 +22,7 @@ $GLOBALS['TL_DCA']['tl_calendar_events']['list']['sorting']['child_record_callba
 class tl_calendar_events_room_reservation extends tl_calendar_events {
     public function listEvents($row)
     {
-        if ($row['member']) {
+        if ($row['member'] > 0) {
             $member = MemberModel::findByPk($row['member']);
             return parent::listEvents($row) . ' ' . $member->firstname . ' ' . $member->lastname;
         } else {

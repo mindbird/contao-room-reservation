@@ -103,7 +103,7 @@ class Booking extends Module
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'eventTitle';
         $field->label = 'Titel der Veranstaltung';
-        $field->value = Input::post('startDate');
+        $field->value = Input::post('eventTitle');
         $this->fields['eventTitle'] = $field;
 
         $field = new FormTextField();
