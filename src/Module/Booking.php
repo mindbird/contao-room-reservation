@@ -11,6 +11,7 @@ use Contao\FormTextField;
 use Contao\FrontendUser;
 use Contao\Module;
 use Contao\Input;
+use NotificationCenter\Model\Notification;
 
 /**
  * Created by mindbird
@@ -58,7 +59,20 @@ class Booking extends Module
                 $cem->member = $user->id;
                 $cem->save();
 
-                $this->jumpToOrReload($this->jumpTo);
+                if ($this->room_reservation_notification != 0) {
+                    $token = [
+                        'room_start_date' => $startDate->format('d.m.Y H:i'),
+                        'room_end_date' => $endDate->format('d.m.Y H:i'),
+                        'room_event_title' => Input::post('eventTitle'),
+
+                    ];
+                    $notification = Notification::findByPk($this->room_reservation_notification);
+                    if (null !== $notification) {
+                        $notification->send($token);
+                    }
+                }
+
+                $this->jumpToOrReload($this->jumpTo, '/month/' . $startDate->format('Ym'));
             } else {
                 $this->Template->noTimeslotAvailable = true;
             }
