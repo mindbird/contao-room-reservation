@@ -16,28 +16,39 @@
         <div class="column"><?= $this->fields['endTime']->parse() ?></div>
     </div>
     <div class="row">
-        <div class="column"><button id="calcPrice">Preis berechnen</button></div>
+        <div class="column"><?= $this->fields['repeat']->parse() ?></div>
+        <div class="column repeatTimes"><?= $this->fields['repeatTimes']->parse() ?></div>
+    </div>
+    <div class="row">
+        <div class="column">
+            <button id="calcPrice">Verfügbarkeit prüfen</button>
+        </div>
         <div class="column"></div>
+    </div>
+    <div class="row events">
+        <div class="column"><p></p></div>
     </div>
     <div class="row price">
         <div class="column"><span class="value"></span>,00 EUR</div>
         <div class="column"></div>
     </div>
-    <div class="row price">
+    <div class="row booking">
         <div class="column"><?= $this->fields['agb']->parse() ?></div>
     </div>
     <div class="row booking">
-        <div class="column"><button>Verfügbarkeit prüfen und reservieren</button></div>
+        <div class="column">
+            <button>Verfügbarkeit prüfen und reservieren</button>
+        </div>
         <div class="column"></div>
     </div>
 </form>
 
 <?php if ($this->noTimeslotAvailable): ?>
-    <p>In dem angegebenen Zeitraum ist kein freier Raum verfügbar.</p>
+<p>In dem angegebenen Zeitraum ist kein freier Raum verfügbar.</p>
 <?php endif; ?>
 
 <script type="text/javascript">
-    $(function() {
+    $(function () {
         var minBookingTime = parseInt('<?= $this->minBookingTime ?>');
         var startDate = new Date();
         startDate.setDate(startDate.getDate());
@@ -45,7 +56,7 @@
             language: 'de-DE',
             autoHide: true,
             startDate: startDate,
-            pick: function() {
+            pick: function () {
                 if ($('[name="startDate"]').datepicker('getDate') > $('[name="endDate"]').datepicker('getDate')) {
                     $('[name="endDate"]').val('');
                 }
@@ -57,20 +68,20 @@
             language: 'de-DE',
             autoHide: true,
             startDate: startDate,
-            pick: function() {
+            pick: function () {
                 $('[name=startTime]').change();
             }
         });
 
-        $('[name=startTime]').change(function() {
+        $('[name=startTime]').change(function () {
             var value = $(this).val();
-            var startValue = parseFloat(value[0] + value[1]) + parseFloat(value[3] + value[4])/60;
-            $('[name=endTime] option').each(function() {
+            var startValue = parseFloat(value[0] + value[1]) + parseFloat(value[3] + value[4]) / 60;
+            $('[name=endTime] option').each(function () {
                 if ($(this).val()[4] != value[4]) {
                     $(this).hide();
                 } else {
-                    var endValue = parseFloat($(this).val()[0] + $(this).val()[1]) + parseFloat($(this).val()[3] + $(this).val()[4])/60;
-                    var difference = endValue - startValue - parseFloat(minBookingTime/60);
+                    var endValue = parseFloat($(this).val()[0] + $(this).val()[1]) + parseFloat($(this).val()[3] + $(this).val()[4]) / 60;
+                    var difference = endValue - startValue - parseFloat(minBookingTime / 60);
                     if ($('[name="startDate"]').datepicker('getDate', 'U') == $('[name="endDate"]').datepicker('getDate', 'U') && difference < 0) {
                         $(this).hide();
                     } else {
@@ -82,8 +93,16 @@
             });
         });
 
+        $('[name=repeat]').click(function () {
+            if ($(this).is(':checked')) {
+                $('.repeatTimes').show();
+            } else {
+                $('.repeatTimes').hide();
+            }
+        });
+
         $('.room-reservation').validate({
-            errorPlacement: function(error, element) {
+            errorPlacement: function (error, element) {
                 element.closest('.formElement').find('div.error').html(error.html());
             },
             success: function (error) {
@@ -101,38 +120,68 @@
                     greaterThan: ['startTime', 'startDate', 'endDate']
                 },
                 agb: 'required',
+                repeatTimes: {
+                    required: true,
+                    min: 1,
+                    step: 1,
+                    digits: true
+                }
             }
         });
 
         $('[name=startTime]').change();
 
-        $('#calcPrice').click(function(e) {
+        $('#calcPrice').click(function (e) {
             e.preventDefault();
-            calcPrice();
+            $('.events').hide();
+            $('.booking').hide();
+            if ($('.room-reservation').valid()) {
+                $.ajax({
+                    method: 'POST',
+                    dataType: 'json',
+                    url: window.location.href,
+                    data: {
+                        FORM_SUBMIT: $('[name=FORM_SUBMIT]').val(),
+                        REQUEST_TOKEN: $('[name=REQUEST_TOKEN]').val(),
+                        action: 'checkAvailability',
+                        startDate: $('[name=startDate]').val(),
+                        startTime: $('[name=startTime]').val(),
+                        endDate: $('[name=endDate]').val(),
+                        endTime: $('[name=endTime]').val(),
+                        repeat: $('[name=repeatTimes]').val()
+                    }
+                }).done(function (data) {
+                    $('.events p').html(data.events.join('<br>'));
+                    if (data.status) {
+                        $('.events p').addClass('info');
+                        $('.booking').show();
+                    } else {
+                        $('.events p').addClass('warning');
+                    }
+                    $('.events').show();
+                });
+                calcPrice();
+            }
         });
 
         function calcPrice() {
-            if ($('.room-reservation').valid()) {
-                var startDate = parseDate($('[name="startDate"]').val() + ' ' + $('[name="startTime"]').val());
-                var endDate = parseDate($('[name="endDate"]').val() + ' ' + $('[name="endTime"]').val());
-                var startTime = $('[name="startTime"]').val().split(':');
-                var endTime = $('[name="endTime"]').val().split(':');
-                var price = 0;
+            var startDate = parseDate($('[name="startDate"]').val() + ' ' + $('[name="startTime"]').val());
+            var endDate = parseDate($('[name="endDate"]').val() + ' ' + $('[name="endTime"]').val());
+            var startTime = $('[name="startTime"]').val().split(':');
+            var endTime = $('[name="endTime"]').val().split(':');
+            var price = 0;
 
-                if ($('[name="startDate"]').val() == $('[name="endDate"]').val()) {
-                    price = calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTime[0] + '.' + startTime[1]));
+            if ($('[name="startDate"]').val() == $('[name="endDate"]').val()) {
+                price = calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTime[0] + '.' + startTime[1]));
 
-                } else {
-                    price = calcDay(parseFloat('<?= $this->endTime ?>') - parseFloat(startTime[0] + '.' + startTime[1]));
-                    price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat('<?= $this->startTime ?>'));
-                    price += (Math.round(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24 )) - 2) * dayPrice;
-                }
-
-                $('.price .value').html(price.toLocaleString('de-DE'));
-                $('.price').show();
-                $('.booking').show();
+            } else {
+                price = calcDay(parseFloat('<?= $this->endTime ?>') - parseFloat(startTime[0] + '.' + startTime[1]));
+                price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat('<?= $this->startTime ?>'));
+                price += (Math.round(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24 )) - 2) * dayPrice;
             }
 
+            $('.price .value').html(price.toLocaleString('de-DE'));
+            $('.price').show();
         }
 
         var dayPrice = parseFloat('<?= $this->priceDay ?>');
@@ -157,8 +206,10 @@
             }
         }
 
+        $('.events').hide();
         $('.price').hide();
         $('.booking').hide();
+        $('.repeatTimes').hide();
     });
 </script>
 <?php $this->endblock(); ?>
