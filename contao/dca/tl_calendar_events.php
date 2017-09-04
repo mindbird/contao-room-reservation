@@ -7,7 +7,7 @@ $GLOBALS['TL_DCA']['tl_calendar_events']['fields']['member'] = array(
     'inputType' => 'select',
     'foreignKey' => 'tl_member.CONCAT(firstname," ",lastname)',
     'eval' => array(
-        'mandatory' => true,
+        'mandatory' => false,
         'tl_class' => 'clr'
     ),
     'relation' =>
