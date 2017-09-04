@@ -2,7 +2,7 @@
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['room_event_archive'] = array(
     'label' => &$GLOBALS['TL_LANG']['tl_module']['room_event_archive'],
-    'default' => '',
+    'default' => '0',
     'exclude' => true,
     'inputType' => 'select',
     'foreignKey' => 'tl_calendar.title',
