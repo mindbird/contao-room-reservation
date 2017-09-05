@@ -27,7 +27,6 @@
     </div>
     <div class="row events">
         <div class="column">
-            <p>
                 <table>
                     <thead>
                         <tr>
@@ -41,7 +40,6 @@
 
                     </tbody>
                 </table>
-            </p>
         </div>
     </div>
     <div class="row booking">
@@ -166,10 +164,7 @@
                 }).done(function (data) {
                     $('.events table tbody').html(data.events.join('<br>'));
                     if (data.status) {
-                        $('.events p').addClass('info');
                         $('.booking').show();
-                    } else {
-                        $('.events p').addClass('warning');
                     }
                     $('.events').show();
                     if (usePricing) {
