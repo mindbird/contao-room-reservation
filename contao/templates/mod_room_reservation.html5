@@ -26,11 +26,23 @@
         <div class="column"></div>
     </div>
     <div class="row events">
-        <div class="column"><p></p></div>
-    </div>
-    <div class="row price">
-        <div class="column"><span class="value"></span>,00 EUR</div>
-        <div class="column"></div>
+        <div class="column">
+            <p>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Start</td>
+                            <td>Ende</td>
+                            <td class="price">Preis</td>
+                            <td>Status</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </p>
+        </div>
     </div>
     <div class="row booking">
         <div class="column"><?= $this->fields['agb']->parse() ?></div>
@@ -61,6 +73,7 @@
                     $('[name="endDate"]').val('');
                 }
                 $('[name="endDate"]').datepicker('setStartDate', $('[name="startDate"]').datepicker('getDate'));
+                $('[name="endDate"]').datepicker('setDate', $('[name="startDate"]').datepicker('getDate'));
                 $('[name=startTime]').change();
             }
         });
@@ -151,7 +164,7 @@
                         repeat: $('[name=repeatTimes]').val()
                     }
                 }).done(function (data) {
-                    $('.events p').html(data.events.join('<br>'));
+                    $('.events table tbody').html(data.events.join('<br>'));
                     if (data.status) {
                         $('.events p').addClass('info');
                         $('.booking').show();
@@ -159,8 +172,13 @@
                         $('.events p').addClass('warning');
                     }
                     $('.events').show();
+                    if (usePricing) {
+                        calcPrice();
+                    } else {
+                        $('.price').hide();
+                    }
                 });
-                calcPrice();
+
             }
         });
 
@@ -172,11 +190,11 @@
             var price = 0;
 
             if ($('[name="startDate"]').val() == $('[name="endDate"]').val()) {
-                price = calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTime[0] + '.' + startTime[1]));
+                price = calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTime[0] + '.' + startTime[1]), parseFloat(startTime[0] + '.' + startTime[1]));
 
             } else {
-                price = calcDay(parseFloat('<?= $this->endTime ?>') - parseFloat(startTime[0] + '.' + startTime[1]));
-                price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat('<?= $this->startTime ?>'));
+                price = calcDay(parseFloat('<?= $this->endTime ?>') - parseFloat(startTime[0] + '.' + startTime[1]), parseFloat(startTime[0] + '.' + startTime[1]));
+                price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat('<?= $this->startTime ?>'), parseFloat('<?= $this->startTime ?>'));
                 price += (Math.round(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24 )) - 2) * dayPrice;
             }
 
@@ -184,26 +202,40 @@
             $('.price').show();
         }
 
+        var usePricing = parseInt('<?= $this->usePricing ?>');
         var dayPrice = parseFloat('<?= $this->priceDay ?>');
+        var useHalfDay = parseInt('<?= $this->useHalfDay ?>');
         var halfDayPrice = parseFloat('<?= $this->priceHalfDay ?>');
         var hourPrice = parseFloat('<?= $this->priceHour ?>');
+        var useHalfHour = parseInt('<?= $this->useHalfHour ?>');
         var halfHourPrice = parseFloat('<?= $this->priceHalfHour ?>');
+        var useEvening = parseInt('<?= $this->useEvening ?>');
+        var eveningPrice = parseFloat('<?= $this->priceEvening ?>');
+        var eveningStart = parseFloat('<?= $this->eveningStart ?>');
 
-        function calcDay(time) {
-            var rest = time % 1;
-            var restPrice = 0;
-            if (rest != 0) {
-                restPrice = halfHourPrice
+        function calcDay(duration, startTime) {
+            var rest = duration % 1;
+            var price = 0;
+            if (rest != 0 && useHalfHour) {
+                price += halfHourPrice
+            } else if (rest != 0 && !useHalfHour) {
+                price += hourPrice;
             }
-            if (time >= 8) {
-                return dayPrice;
-            } else if (time < 8 && time > 5) {
-                return halfDayPrice + (time - 5 - rest) * hourPrice + restPrice;
-            } else if (time == 5) {
-                return halfDayPrice;
-            } else if (time < 5) {
-                return (time - rest) * hourPrice + restPrice
+
+            if (duration >= 8) {
+                price += dayPrice;
+            } else if (useHalfDay && duration < 8 && duration > 5) {
+                price += halfDayPrice + (duration - 5 - rest) * hourPrice;
+            } else if (useHalfDay && duration == 5) {
+                price += halfDayPrice;
+            } else {
+                price += (duration - rest) * hourPrice
             }
+
+            if (useEvening && startTime >= eveningStart && price > eveningPrice) {
+                price = eveningPrice;
+            }
+            return price;
         }
 
         $('.events').hide();

@@ -98,6 +98,7 @@ class Booking extends Module
             $this->fields['endDate']->value = $date;
         }
 
+        $this->Template->usePricing = $this->room_reservation_use_pricing;
         $this->Template->priceDay = $this->room_reservation_price_day;
         $this->Template->priceHalfDay = $this->room_reservation_price_half_day;
         $this->Template->priceHour = $this->room_reservation_price_hour;
@@ -105,19 +106,31 @@ class Booking extends Module
         $this->Template->startTime = $this->room_reservation_start_time;
         $this->Template->endTime = $this->room_reservation_end_time;
         $this->Template->minBookingTime = $this->room_reservation_min_booking_time;
+        $this->Template->useHalfHour = $this->room_reservation_use_half_hour;
+        $this->Template->useHalfDay = $this->room_reservation_use_half_day;
+        $this->Template->useEvening = $this->room_reservation_use_evening;
+        $this->Template->priceEvening = $this->room_reservation_price_evening;
+        $eveningStart = new \DateTime('@' . $this->room_reservation_evening_start, new \DateTimeZone($GLOBALS['TL_CONFIG']['timeZone']));
+        $this->Template->eveningStart = $eveningStart->format('H:i');
+        if($this->room_reservation_booking_one_day == '1') {
+            $this->fields['endDate']->template = 'form_hidden';
+        }
     }
 
     protected function initFields()
     {
 
         $timeslot = array();
-        for ($i = $this->room_reservation_start_time; $i <= $this->room_reservation_end_time; $i++) {
-            $timeslot[] = $this->addTimeslotarray($i, '00');
-            $timeslot[] = $this->addTimeslotarray($i, '15');
-            $timeslot[] = $this->addTimeslotarray($i, '30');
-            if ($i != $this->room_reservation_end_time) {
-                $timeslot[] = $this->addTimeslotarray($i, '45');
-            }
+        $startTime = new \DateTime('@' . $this->room_reservation_start_time, new \DateTimeZone($GLOBALS['TL_CONFIG']['timeZone']));
+        $endTime = new \DateTime('@' . $this->room_reservation_end_time, new \DateTimeZone($GLOBALS['TL_CONFIG']['timeZone']));
+        $time = $startTime;
+        $interval = new \DateInterval('PT15M');
+        while ($time <= $endTime) {
+            $timeslot[] = [
+                'label' => $time->format('H:i'),
+                'value' => $time->format('H:i')
+            ];
+            $time->add($interval);
         }
 
         $field = new FormHidden();
@@ -211,14 +224,6 @@ class Booking extends Module
         $this->Template->fields = $this->fields;
     }
 
-    private function addTimeslotarray($hour, $minute)
-    {
-        return array(
-            'label' => str_pad($hour, 2, 0, STR_PAD_LEFT) . ':' . $minute,
-            'value' => str_pad($hour, 2, 0, STR_PAD_LEFT) . ':' . $minute
-        );
-    }
-
     /**
      * @param \DateTime $startDate
      * @param \DateTime $endDate
@@ -252,14 +257,14 @@ class Booking extends Module
             $startDateTime->add($addInterval);
             $endDateTime = \DateTime::createFromFormat('d.m.YH:i', $endDate . $endTime);
             $endDateTime->add($addInterval);
-            $availabilityEvent = $startDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']) . ' bis ' . $endDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']) . ' - ';
+            $availabilityEvent = '<tr><td>' . $startDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']) . '</td><td>' . $endDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']) . '</td><td class="price"><span class="value"></span>,00 EUR</td><td>';
             if (!$this->checkAvailability($startDateTime, $endDateTime)) {
                 $availabilityEvent .= '<span class="error">nicht verfügbar</span>';
                 $return['status'] = false;
             } else {
                 $availabilityEvent .= '<span>verfügbar</span>';
             }
-            $return['events'][] = $availabilityEvent;
+            $return['events'][] = $availabilityEvent . '</td>';
         }
 
         return $return;
