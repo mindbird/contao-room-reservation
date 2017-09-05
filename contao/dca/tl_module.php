@@ -1,5 +1,15 @@
 <?php
 
+$timeslot = array();
+$startTime = new \DateTime('00:00');
+$endTime = new \DateTime('23:59');
+$time = $startTime;
+$interval = new \DateInterval('PT15M');
+while ($time <= $endTime) {
+    $timeslot[] = $time->format('H:i');
+    $time->add($interval);
+}
+
 $GLOBALS['TL_DCA']['tl_module']['fields']['room_event_archive'] = array(
     'label' => &$GLOBALS['TL_LANG']['tl_module']['room_event_archive'],
     'default' => '0',
@@ -15,22 +25,22 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['room_event_archive'] = array(
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_start_time'] = array(
     'label' => &$GLOBALS['TL_LANG']['tl_module']['room_reservation_start_time'],
-    'inputType' => 'text',
+    'inputType' => 'select',
+    'options' => $timeslot,
     'eval' => array(
         'mandatory' => true,
-        'tl_class' => 'w50',
-        'rgxp' => 'time'
+        'tl_class' => 'w50'
     ),
     'sql' => "char(5) NOT NULL default '08:00'"
 );
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_end_time'] = array(
     'label' => &$GLOBALS['TL_LANG']['tl_module']['room_reservation_end_time'],
-    'inputType' => 'text',
+    'inputType' => 'select',
+    'options' => $timeslot,
     'eval' => array(
         'mandatory' => true,
-        'tl_class' => 'w50',
-        'rgxp' => 'time'
+        'tl_class' => 'w50'
     ),
     'sql' => "char(5) NOT NULL default '22:00'"
 );
@@ -125,11 +135,11 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_price_evening'] = ar
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_evening_start'] = array(
     'label' => &$GLOBALS['TL_LANG']['tl_module']['room_reservation_evening_start'],
-    'inputType' => 'text',
+    'inputType' => 'select',
+    'options' => $timeslot,
     'eval' => array(
         'mandatory' => true,
-        'tl_class' => 'w50',
-        'rgxp' => 'time'
+        'tl_class' => 'w50'
     ),
     'sql' => "char(5) NOT NULL default '18:00'"
 );

@@ -110,8 +110,7 @@ class Booking extends Module
         $this->Template->useHalfDay = $this->room_reservation_use_half_day;
         $this->Template->useEvening = $this->room_reservation_use_evening;
         $this->Template->priceEvening = $this->room_reservation_price_evening;
-        $eveningStart = new \DateTime('@' . $this->room_reservation_evening_start, new \DateTimeZone($GLOBALS['TL_CONFIG']['timeZone']));
-        $this->Template->eveningStart = $eveningStart->format('H:i');
+        $this->Template->eveningStart = $this->room_reservation_evening_start;
         if($this->room_reservation_booking_one_day == '1') {
             $this->fields['endDate']->template = 'form_hidden';
         }
@@ -119,20 +118,6 @@ class Booking extends Module
 
     protected function initFields()
     {
-
-        $timeslot = array();
-        $startTime = new \DateTime('@' . $this->room_reservation_start_time, new \DateTimeZone($GLOBALS['TL_CONFIG']['timeZone']));
-        $endTime = new \DateTime('@' . $this->room_reservation_end_time, new \DateTimeZone($GLOBALS['TL_CONFIG']['timeZone']));
-        $time = $startTime;
-        $interval = new \DateInterval('PT15M');
-        while ($time <= $endTime) {
-            $timeslot[] = [
-                'label' => $time->format('H:i'),
-                'value' => $time->format('H:i')
-            ];
-            $time->add($interval);
-        }
-
         $field = new FormHidden();
         $field->name = 'FORM_SUBMIT';
         $field->value = 'room_reservation_booking_' . $this->id;
@@ -152,8 +137,22 @@ class Booking extends Module
         $field->id = 'startDate';
         $field->label = 'Startdatum';
         $field->mandatory = true;
-        $field->value = Input::post('startDate');
+        $field->value = Input::post('startDate') ?? date('d.m.Y');
         $this->fields['startDate'] = $field;
+
+        $timeslot = array();
+        $startTime = new \DateTime($this->room_reservation_start_time);
+        $endTime = new \DateTime($this->room_reservation_end_time);
+        $endTime->sub(new \DateInterval('PT' . $this->room_reservation_min_booking_time .'M'));
+        $time = $startTime;
+        $interval = new \DateInterval('PT15M');
+        while ($time <= $endTime) {
+            $timeslot[] = [
+                'label' => $time->format('H:i'),
+                'value' => $time->format('H:i')
+            ];
+            $time->add($interval);
+        }
 
         $field = new FormSelectMenu();
         $field->template = 'form_room_reservation_select';
@@ -171,8 +170,22 @@ class Booking extends Module
         $field->id = 'endDate';
         $field->label = 'Enddatum';
         $field->mandatory = true;
-        $field->value = Input::post('endDate');
+        $field->value = Input::post('endDate') ?? date('d.m.Y');
         $this->fields['endDate'] = $field;
+
+        $timeslot = array();
+        $startTime = new \DateTime($this->room_reservation_start_time);
+        $startTime->add(new \DateInterval('PT' . $this->room_reservation_min_booking_time .'M'));
+        $endTime = new \DateTime($this->room_reservation_end_time);
+        $time = $startTime;
+        $interval = new \DateInterval('PT15M');
+        while ($time <= $endTime) {
+            $timeslot[] = [
+                'label' => $time->format('H:i'),
+                'value' => $time->format('H:i')
+            ];
+            $time->add($interval);
+        }
 
         $field = new FormSelectMenu();
         $field->template = 'form_room_reservation_select';
