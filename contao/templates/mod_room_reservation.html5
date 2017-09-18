@@ -47,7 +47,7 @@
     </div>
     <div class="row booking">
         <div class="column">
-            <button>Verfügbarkeit prüfen und reservieren</button>
+            <button>Reservieren</button>
         </div>
         <div class="column"></div>
     </div>
