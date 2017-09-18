@@ -137,7 +137,7 @@ class Booking extends Module
         $field->id = 'startDate';
         $field->label = 'Startdatum';
         $field->mandatory = true;
-        $field->value = Input::post('startDate') ?? date('d.m.Y');
+        $field->value = Input::post('startDate') != '' ? Input::post('startDate') : date('d.m.Y');
         $this->fields['startDate'] = $field;
 
         $timeslot = array();
@@ -170,7 +170,7 @@ class Booking extends Module
         $field->id = 'endDate';
         $field->label = 'Enddatum';
         $field->mandatory = true;
-        $field->value = Input::post('endDate') ?? date('d.m.Y');
+        $field->value = Input::post('endDate') != '' ? Input::post('endDate') : date('d.m.Y');
         $this->fields['endDate'] = $field;
 
         $timeslot = array();
