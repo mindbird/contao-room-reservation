@@ -89,19 +89,18 @@
             var startValue = parseFloat(value[0] + value[1]) + parseFloat(value[3] + value[4]) / 60;
             $('[name=endTime] option').each(function () {
                 if ($(this).val()[4] != value[4]) {
-                    $(this).hide();
+                    $(this).hide().prop('disabled', true);
                 } else {
                     var endValue = parseFloat($(this).val()[0] + $(this).val()[1]) + parseFloat($(this).val()[3] + $(this).val()[4]) / 60;
                     var difference = endValue - startValue - parseFloat(minBookingTime / 60);
                     if ($('[name="startDate"]').datepicker('getDate', 'U') == $('[name="endDate"]').datepicker('getDate', 'U') && difference < 0) {
-                        $(this).hide();
+                        $(this).hide().prop('disabled', true);
                     } else {
-                        $(this).show();
+                        $(this).show().prop('disabled', false);
                     }
                 }
-
-
             });
+            $('[name=endTime]').val('');
         });
 
         $('[name=repeat]').click(function () {
