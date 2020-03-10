@@ -1,6 +1,6 @@
 <?php
 
-namespace Mindbird\Contao\Company;
+namespace Mindbird\Contao\RoomReservation;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

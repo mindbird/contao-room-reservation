@@ -8,13 +8,13 @@
  * @license LGPL-3.0-or-later
  */
 
-namespace Mindbird\Contao\Company\ContaoManager;
+namespace Mindbird\Contao\RoomReservation\ContaoManager;
 
 use Contao\CoreBundle\ContaoCoreBundle;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
-use Mindbird\Contao\Company\ContaoCompanyBundle;
+use Mindbird\Contao\RoomReservation\ContaoRoomReservationBundle;
 
 class Plugin implements BundlePluginInterface
 {
@@ -24,7 +24,7 @@ class Plugin implements BundlePluginInterface
     public function getBundles(ParserInterface $parser)
     {
         return [
-            BundleConfig::create(ContaoCompanyBundle::class)
+            BundleConfig::create(ContaoRoomReservationBundle::class)
                 ->setLoadAfter([ContaoCoreBundle::class]),
         ];
     }
