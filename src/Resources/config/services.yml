@@ -4,7 +4,7 @@ services:
     arguments:
       - "@mindbird.contao.booking_service"
     tags:
-      - { name: contao.frontend_module, category: companies }
+      - { name: contao.frontend_module, category: miscellaneous }
 
   # Services
   mindbird.contao.booking_service:

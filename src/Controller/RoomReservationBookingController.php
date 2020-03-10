@@ -4,6 +4,7 @@ namespace Mindbird\Contao\RoomReservation\Controller;
 
 use Contao\CalendarEventsModel;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
+use Contao\CoreBundle\ServiceAnnotation\FrontendModule;
 use Contao\Environment;
 use Contao\FrontendUser;
 use Contao\Input;
@@ -16,7 +17,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class BookingController extends AbstractFrontendModuleController
+class RoomReservationBookingController extends AbstractFrontendModuleController
 {
     protected $bookingService;
 
