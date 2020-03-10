@@ -87,8 +87,8 @@ class BookingService
         return 0 === $result->numRows;
     }
 
-    public function initFields($moduleId, $startTime, $endTime, $minBookingTime, $pageAgbId)
-    {
+    public function initFields($moduleId, $startTime, $endTime, $minBookingTime, $pageAgbId) {
+
         $fields = [];
 
         $date = Input::get('date');
@@ -152,20 +152,6 @@ class BookingService
         $field->mandatory = true;
         $field->value = '' === $date ? date('d.m.Y') : $date;
         $fields['endDate'] = $field;
-
-        $timeslot = [];
-        $startTime = new DateTime($startTime);
-        $startTime->add(new DateInterval('PT'.$minBookingTime.'M'));
-        $endTime = new DateTime($endTime);
-        $time = $startTime;
-        $interval = new DateInterval('PT15M');
-        while ($time <= $endTime) {
-            $timeslot[] = [
-                'label' => $time->format('H:i'),
-                'value' => $time->format('H:i'),
-            ];
-            $time->add($interval);
-        }
 
         $field = new FormSelectMenu();
         $field->template = 'form_room_reservation_select';

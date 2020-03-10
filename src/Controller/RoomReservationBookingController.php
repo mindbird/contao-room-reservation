@@ -11,7 +11,9 @@
 namespace Mindbird\Contao\RoomReservation\Controller;
 
 use Contao\CalendarEventsModel;
+use Contao\Controller;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
+use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\Environment;
 use Contao\FrontendUser;
 use Contao\Input;
@@ -41,10 +43,22 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
             return json_encode($this->checkAvailabilityAjax(Input::post('repeat'), Input::post('startDate'), Input::post('startTime'), Input::post('endDate'), Input::post('endTime')));
         }
 
-        $GLOBALS['TL_CSS'][] = 'system/modules/room_reservation/assets/css/datepicker.min.css';
-        $GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/room_reservation/assets/js/datepicker.min.js|static';
-        $GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/room_reservation/assets/js/datepicker-de.js|static';
-        $GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/room_reservation/assets/js/jquery.validate.js|static';
+        $GLOBALS['TL_CSS'][] = 'bundles/contaoroomreservation/css/datepicker.min.css|screen|static';
+        $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
+            Controller::addAssetsUrlTo('bundles/datepicker/js/datepicker.min.js'),
+            false,
+            true
+        );
+        $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
+            Controller::addAssetsUrlTo('bundles/datepicker/js/datepicker-de.js'),
+            false,
+            true
+        );
+        $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
+            Controller::addAssetsUrlTo('bundles/datepicker/js/jquery.validate.js'),
+            false,
+            true
+        );
 
         $template->fields = $this->bookingService->initFields(
             $model->id,
@@ -98,7 +112,10 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
                     $notification->send($token);
                 }
             }
-            $jumpToPage = PageModel::findPublishedById($this->jumpTo);
+            $jumpToPage = PageModel::findPublishedById($model->room_reservation_jump_to);
+            if ($jumpToPage === null) {
+                throw new PageNotFoundException('Page #' . $model->room_reservation_jump_to);
+            }
 
             return new RedirectResponse(Environment::get('base').ltrim($jumpToPage->getFrontendUrl('/month/'.$startDate->format('Ym')), '/'));
         }
