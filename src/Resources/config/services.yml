@@ -8,6 +8,6 @@ services:
 
   # Services
   mindbird.contao.booking_service:
-    class: Mindbird\Contao\RoomReservation\Services\BookingService
+    class: Mindbird\Contao\RoomReservation\Service\BookingService
 
   Mindbird\Contao\RoomReservation\Service\BookingService: '@mindbird.contao.booking_service'
