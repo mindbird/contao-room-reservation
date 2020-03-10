@@ -1,7 +1,7 @@
 frontend_room_reservation:
   path: /_room_reservation/availability
   defaults:
-    _controller: ContaoRoomReservationBundle:AvailabilityController:checkAvailability
+    _controller: ContaoRoomReservationBundle:Availability:checkAvailability
     _scope: frontend
     _token_check: true
   methods: [POST]

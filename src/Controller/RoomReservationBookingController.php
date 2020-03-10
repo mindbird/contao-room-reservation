@@ -39,10 +39,6 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
 
     protected function getResponse(Template $template, ModuleModel $model, Request $request): ?Response
     {
-        if ('checkAvailability' === Input::post('action') && Input::post($this->fields['formSubmit']->name) === $this->fields['formSubmit']->value) {
-            return json_encode($this->checkAvailabilityAjax(Input::post('repeat'), Input::post('startDate'), Input::post('startTime'), Input::post('endDate'), Input::post('endTime')));
-        }
-
         $GLOBALS['TL_CSS'][] = 'bundles/contaoroomreservation/css/datepicker.min.css|screen|static';
         $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
             Controller::addAssetsUrlTo('bundles/contaoroomreservation/js/datepicker.min.js'),
@@ -67,8 +63,8 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
             $model->room_reservation_min_booking_time,
             $model->room_reservation_page_agb
         );
-        $user = FrontendUser::getInstance();
 
+        $user = FrontendUser::getInstance();
         if ('FORM_SUBMIT' === Input::post('room_reservation_booking_'.$model->id)) {
             $repeat = 0;
             if (Input::post('repeatTimes') > 0) {
