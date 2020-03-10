@@ -45,17 +45,17 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
 
         $GLOBALS['TL_CSS'][] = 'bundles/contaoroomreservation/css/datepicker.min.css|screen|static';
         $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
-            Controller::addAssetsUrlTo('bundles/datepicker/js/datepicker.min.js'),
+            Controller::addAssetsUrlTo('bundles/contaoroomreservation/js/datepicker.min.js'),
             false,
             true
         );
         $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
-            Controller::addAssetsUrlTo('bundles/datepicker/js/datepicker-de.js'),
+            Controller::addAssetsUrlTo('bundles/contaoroomreservation/js/datepicker-de.js'),
             false,
             true
         );
         $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
-            Controller::addAssetsUrlTo('bundles/datepicker/js/jquery.validate.js'),
+            Controller::addAssetsUrlTo('bundles/contaoroomreservation/js/jquery.validate.js'),
             false,
             true
         );

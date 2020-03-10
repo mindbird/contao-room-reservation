@@ -149,7 +149,7 @@
                 $.ajax({
                     method: 'POST',
                     dataType: 'json',
-                    url: window.location.href,
+                    url: '/_room_reservation/availability',
                     data: {
                         FORM_SUBMIT: $('[name=FORM_SUBMIT]').val(),
                         REQUEST_TOKEN: $('[name=REQUEST_TOKEN]').val(),
