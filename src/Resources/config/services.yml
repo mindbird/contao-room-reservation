@@ -1,0 +1,13 @@
+services:
+  # Frontend modules
+  Mindbird\Contao\RoomReservation\Controller\BookingController:
+    arguments:
+      - "@mindbird.contao.booking_service"
+    tags:
+      - { name: contao.frontend_module, category: companies }
+
+  # Services
+  mindbird.contao.booking_service:
+    class: Mindbird\Contao\RoomReservation\Services\BookingService
+
+  Mindbird\Contao\RoomReservation\Services\BookingService: '@mindbird.contao.booking_service'

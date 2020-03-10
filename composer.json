@@ -1,10 +1,10 @@
 {
   "name": "mindbird/contao-room-reservation",
-  "description": "Simple room reservation formular",
+  "description": "Simple room reservation bundle",
   "minimum-stability": "stable",
-  "license": "proprietary",
+  "license": "LGPL-3.0-or-later",
   "keywords":["contao", "room", "reservation"],
-  "type":"contao-module",
+  "type":"contao-bundle",
   "authors": [
     {
       "name": "mindbird",
@@ -12,20 +12,26 @@
     }
   ],
   "require": {
-    "contao/core-bundle": "~3.2 || ~4.0",
-    "contao-community-alliance/composer-plugin": "~2.4 || ~3.0",
-    "terminal42/notification_center": "~1.0"
+    "php": "^7.2",
+    "contao/core-bundle": "^4.9",
+    "contao/calendar-bundle": "^4.9",
+    "terminal42/notification_center": "~1.5"
   },
-  "extra": {
-    "contao": {
-      "sources": {
-        "contao": "system/modules/room_reservation"
-      }
-    }
+  "require-dev": {
+    "roave/security-advisories": "dev-master",
+    "contao/manager-plugin": "^2.0"
   },
   "autoload": {
     "psr-4": {
-      "RoomReservation\\": "src/"
+      "Mindbird\\\\Contao\\RoomReservation\\": "src/"
     }
+  },
+  "extra": {
+    "contao-manager-plugin": "Mindbird\\Contao\\RoomReservation\\ContaoManager\\Plugin"
+  },
+  "prefer-stable": true,
+  "support": {
+    "issues": "https://github.com/mindbird/contao-room-reservation/issues",
+    "source": "https://github.com/mindbird/contao-room-reservation"
   }
 }
