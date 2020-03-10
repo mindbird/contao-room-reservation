@@ -14,24 +14,6 @@ use Haste\Http\Response\JsonResponse;
 class BookingService
 {
     /**
-     * @param \DateTime $startDate
-     * @param \DateTime $endDate
-     * @param int $roomEventArchiveId
-     * @return boolean
-     */
-    public function checkAvailability(\DateTime $startDate, \DateTime $endDate, $roomEventArchiveId)
-    {
-        $db = Database::getInstance();
-        $result = $db->prepare("SELECT id FROM tl_calendar_events WHERE startTime <= ? AND endTime >= ? AND pid = ?")->execute(
-            $endDate->format('U') + $this->room_reservation_time_between_entries * 60,
-            $startDate->format('U'),
-            $roomEventArchiveId
-        );
-
-        return $result->numRows === 0;
-    }
-
-    /**
      * @param $repeat
      * @param $startDate
      * @param $startTime
@@ -49,7 +31,8 @@ class BookingService
         $endDate,
         $endTime,
         $roomEventArchiveId
-    ) {
+    )
+    {
         $events = [];
 
         for ($i = 0; $i <= $repeat; $i++) {
@@ -73,6 +56,24 @@ class BookingService
             'msg' => '',
             'events' => $events
         ]);
+    }
+
+    /**
+     * @param \DateTime $startDate
+     * @param \DateTime $endDate
+     * @param int $roomEventArchiveId
+     * @return boolean
+     */
+    public function checkAvailability(\DateTime $startDate, \DateTime $endDate, $roomEventArchiveId)
+    {
+        $db = Database::getInstance();
+        $result = $db->prepare("SELECT id FROM tl_calendar_events WHERE startTime <= ? AND endTime >= ? AND pid = ?")->execute(
+            $endDate->format('U') + $this->room_reservation_time_between_entries * 60,
+            $startDate->format('U'),
+            $roomEventArchiveId
+        );
+
+        return $result->numRows === 0;
     }
 
     public function initFields($moduleId, $startTime, $endTime, $minBookingTime, $pageAgbId)
@@ -111,7 +112,7 @@ class BookingService
         $timeslot = array();
         $startTime = new \DateTime($startTime);
         $endTime = new \DateTime($endTime);
-        $endTime->sub(new \DateInterval('PT' . $minBookingTime .'M'));
+        $endTime->sub(new \DateInterval('PT' . $minBookingTime . 'M'));
         $time = $startTime;
         $interval = new \DateInterval('PT15M');
         while ($time <= $endTime) {
@@ -143,7 +144,7 @@ class BookingService
 
         $timeslot = array();
         $startTime = new \DateTime($startTime);
-        $startTime->add(new \DateInterval('PT' . $minBookingTime .'M'));
+        $startTime->add(new \DateInterval('PT' . $minBookingTime . 'M'));
         $endTime = new \DateTime($endTime);
         $time = $startTime;
         $interval = new \DateInterval('PT15M');

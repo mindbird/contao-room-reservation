@@ -2,16 +2,7 @@
 
 namespace Mindbird\Contao\RoomReservation\Module;
 
-use Contao\CalendarEventsModel;
-use Contao\Database;
-use Contao\FormCheckBox;
-use Contao\FormHidden;
-use Contao\FormSelectMenu;
-use Contao\FormTextField;
-use Contao\FrontendUser;
 use Contao\Module;
-use Contao\Input;
-use NotificationCenter\Model\Notification;
 
 /**
  * Created by mindbird

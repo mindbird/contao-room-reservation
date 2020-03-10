@@ -1,9 +1,9 @@
 <?php $this->extend('block_unsearchable'); ?>
 
 <?php $this->block('content'); ?>
-<form method="post" class="room-reservation">
+<form class="room-reservation" method="post">
     <?= $this->fields['formSubmit']->parse() ?>
-    <input type="hidden" name="REQUEST_TOKEN" value="<?= REQUEST_TOKEN ?>">
+    <input name="REQUEST_TOKEN" type="hidden" value="<?= REQUEST_TOKEN ?>">
     <div class="row">
         <div class="column"><?= $this->fields['eventTitle']->parse() ?></div>
     </div>
@@ -27,19 +27,19 @@
     </div>
     <div class="row events">
         <div class="column">
-                <table>
-                    <thead>
-                        <tr>
-                            <td>Start</td>
-                            <td>Ende</td>
-                            <td class="price">Preis</td>
-                            <td>Status</td>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <table>
+                <thead>
+                <tr>
+                    <td>Start</td>
+                    <td>Ende</td>
+                    <td class="price">Preis</td>
+                    <td>Status</td>
+                </tr>
+                </thead>
+                <tbody>
 
-                    </tbody>
-                </table>
+                </tbody>
+            </table>
         </div>
     </div>
     <div class="row booking">
@@ -189,7 +189,7 @@
             } else {
                 price = calcDay(parseFloat('<?= $this->endTime ?>') - parseFloat(startTime[0] + '.' + startTime[1]), parseFloat(startTime[0] + '.' + startTime[1]));
                 price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat('<?= $this->startTime ?>'), parseFloat('<?= $this->startTime ?>'));
-                price += (Math.round(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24 )) - 2) * dayPrice;
+                price += (Math.round(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24)) - 2) * dayPrice;
             }
 
             $('.price .value').html(price.toLocaleString('de-DE'));

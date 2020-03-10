@@ -1,6 +1,7 @@
 <?php $this->extend('form_row'); ?>
 <?php $this->block('field'); ?>
-<div id="ctrl_<?php echo $this->id; ?>" class="formElement checkbox_container<?php if ($this->class) echo ' ' . $this->class; ?> field">
+<div class="formElement checkbox_container<?php if ($this->class) echo ' ' . $this->class; ?> field"
+     id="ctrl_<?php echo $this->id; ?>">
     <?php if ($this->label): ?>
     <label>
         <?= $this->label; ?>
@@ -15,8 +16,12 @@
 
     <?php foreach ($this->getOptions() as $option): ?>
     <div>
-        <input type="checkbox" name="<?php echo $option['name']; ?>" id="opt_<?php echo $option['id']; ?>" class="checkbox" value="<?php echo $option['value']; ?>"<?php echo $option['checked']; ?><?php echo $option['attributes']; ?>>
-        <label id="lbl_<?php echo $option['id']; ?>" for="opt_<?php echo $option['id']; ?>"><?php echo $option['label']; ?></label>
+        <input class="checkbox" id="opt_<?php echo $option['id']; ?>" name="<?php echo $option['name']; ?>"
+               type="checkbox"
+               value="<?php echo $option['value']; ?>"<?php echo $option['checked']; ?><?php echo $option['attributes']; ?>
+        >
+        <label for="opt_<?php echo $option['id']; ?>"
+               id="lbl_<?php echo $option['id']; ?>"><?php echo $option['label']; ?></label>
     </div>
     <?php endforeach; ?>
     <div class="error"><?= $this->getErrorAsString() ?></div>

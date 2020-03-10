@@ -1,21 +1,14 @@
 <?php
 
-
-namespace Contao\Mindbird\RoomReservation\Controller;
+namespace Mindbird\Contao\RoomReservation\Controller;
 
 use Contao\CalendarEventsModel;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\Environment;
-use Contao\FormCheckBox;
-use Contao\FormHidden;
-use Contao\FormSelectMenu;
-use Contao\FormTextField;
-use Contao\Frontend;
 use Contao\FrontendUser;
 use Contao\Input;
 use Contao\ModuleModel;
 use Contao\PageModel;
-use Contao\System;
 use Contao\Template;
 use Mindbird\Contao\RoomReservation\Service\BookingService;
 use NotificationCenter\Model\Notification;
@@ -60,7 +53,7 @@ class BookingController extends AbstractFrontendModuleController
 
             for ($i = 0; $i <= $repeat; $i++) {
                 $addInterval = new \DateInterval('P' . $i * 7 . 'D');
-                $startDate = \DateTime::createFromFormat('d.m.YH:i',Input::post('startDate') . Input::post('startTime'));
+                $startDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('startDate') . Input::post('startTime'));
                 $endDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('endDate') . Input::post('endTime'));
                 $startDate->add($addInterval);
                 $endDate->add($addInterval);
@@ -81,7 +74,7 @@ class BookingController extends AbstractFrontendModuleController
             }
 
             if ($model->room_reservation_notification != 0) {
-                $startDate = \DateTime::createFromFormat('d.m.YH:i',Input::post('startDate') . Input::post('startTime'));
+                $startDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('startDate') . Input::post('startTime'));
                 $endDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('endDate') . Input::post('endTime'));
                 $token = [
                     'room_start_date' => $startDate->format($GLOBALS['TL_CONFIG']['datimFormat']),
@@ -113,7 +106,7 @@ class BookingController extends AbstractFrontendModuleController
         $template->useEvening = $model->room_reservation_use_evening;
         $template->priceEvening = $model->room_reservation_price_evening;
         $template->eveningStart = $model->room_reservation_evening_start;
-        if($model->room_reservation_booking_one_day == '1') {
+        if ($model->room_reservation_booking_one_day == '1') {
             //@TODO
             //$this->fields['endDate']->template = 'form_hidden';
         }

@@ -66,6 +66,7 @@
                         // Prevent form submit to be able to see console output
                         event.preventDefault();
                     }
+
                     function handle() {
                         var hidden, result;
                         if (validator.settings.submitHandler) {
@@ -285,7 +286,7 @@
                 }
             },
             onfocusout: function (element) {
-                if (!this.checkable(element) && ( element.name in this.submitted || !this.optional(element) )) {
+                if (!this.checkable(element) && (element.name in this.submitted || !this.optional(element))) {
                     this.element(element);
                 }
             },
@@ -380,7 +381,7 @@
                 this.invalid = {};
                 this.reset();
 
-                var groups = ( this.groups = {} ),
+                var groups = (this.groups = {}),
                     rules;
                 $.each(this.settings.groups, function (key, value) {
                     if (typeof value === "string") {
@@ -444,7 +445,7 @@
 
             checkForm: function () {
                 this.prepareForm();
-                for (var i = 0, elements = ( this.currentElements = this.elements() ); elements[i]; i++) {
+                for (var i = 0, elements = (this.currentElements = this.elements()); elements[i]; i++) {
                     this.check(elements[i]);
                 }
                 return this.valid();
@@ -517,7 +518,7 @@
 
                     // Remove items from success list
                     this.successList = $.grep(this.successList, function (element) {
-                        return !( element.name in errors );
+                        return !(element.name in errors);
                     });
                 }
                 if (this.settings.showErrors) {
@@ -611,8 +612,8 @@
             findLastActive: function () {
                 var lastActive = this.lastActive;
                 return lastActive && $.grep(this.errorList, function (n) {
-                        return n.element.name === lastActive.name;
-                    }).length === 1 && lastActive;
+                    return n.element.name === lastActive.name;
+                }).length === 1 && lastActive;
             },
 
             elements: function () {
@@ -798,13 +799,13 @@
             // return the generic message if present and no method specific message is present
             customDataMessage: function (element, method) {
                 return $(element).data("msg" + method.charAt(0).toUpperCase() +
-                        method.substring(1).toLowerCase()) || $(element).data("msg");
+                    method.substring(1).toLowerCase()) || $(element).data("msg");
             },
 
             // Return the custom message for the given element name and validation method
             customMessage: function (name, method) {
                 var m = this.settings.messages[name];
-                return m && ( m.constructor === String ? m : m[method] );
+                return m && (m.constructor === String ? m : m[method]);
             },
 
             // Return the first defined argument, allowing empty strings
@@ -836,9 +837,9 @@
                     this.customDataMessage(element, rule.method),
 
                     // 'title' is never undefined, so handle empty string as undefined
-                        !this.settings.ignoreTitle && element.title || undefined,
+                    !this.settings.ignoreTitle && element.title || undefined,
                     $.validator.messages[rule.method],
-                        "<strong>Warning: No message defined for " + element.name + "</strong>"
+                    "<strong>Warning: No message defined for " + element.name + "</strong>"
                     ),
                     theregex = /\$?\{(\d+)\}/g;
                 if (typeof message === "function") {
@@ -997,7 +998,7 @@
                 // 'aria-describedby' should directly reference the error element
                 if (describer) {
                     selector = selector + ", #" + this.escapeCssMeta(describer)
-                            .replace(/\s+/g, ", #");
+                        .replace(/\s+/g, ", #");
                 }
 
                 return this
@@ -1013,7 +1014,7 @@
             },
 
             idOrName: function (element) {
-                return this.groups[element.name] || ( this.checkable(element) ? element.name : element.id || element.name );
+                return this.groups[element.name] || (this.checkable(element) ? element.name : element.id || element.name);
             },
 
             validationTargetFor: function (element) {
@@ -1028,7 +1029,7 @@
             },
 
             checkable: function (element) {
-                return ( /radio|checkbox/i ).test(element.type);
+                return (/radio|checkbox/i).test(element.type);
             },
 
             findByName: function (name) {
@@ -1098,10 +1099,10 @@
                 method = typeof method === "string" && method || "remote";
 
                 return $.data(element, "previousValue") || $.data(element, "previousValue", {
-                        old: null,
-                        valid: true,
-                        message: this.defaultMessage(element, {method: method})
-                    });
+                    old: null,
+                    valid: true,
+                    message: this.defaultMessage(element, {method: method})
+                });
             },
 
             // Cleans up all forms and elements, removes validator-specific events
@@ -1155,7 +1156,7 @@
 
             // Convert the value to a number for number inputs, and for text for backwards compability
             // allows type="date" and others to be compared as strings
-            if (/min|max|step/.test(method) && ( type === null || /number|range|text/.test(type) )) {
+            if (/min|max|step/.test(method) && (type === null || /number|range|text/.test(type))) {
                 value = Number(value);
 
                 // Support Opera Mini, which returns NaN for undefined minlength
@@ -1400,7 +1401,7 @@
             // http://jqueryvalidation.org/rangelength-method/
             rangelength: function (value, element, param) {
                 var length = $.isArray(value) ? value.length : this.getLength(value, element);
-                return this.optional(element) || ( length >= param[0] && length <= param[1] );
+                return this.optional(element) || (length >= param[0] && length <= param[1]);
             },
 
             // http://jqueryvalidation.org/min-method/
@@ -1415,7 +1416,7 @@
 
             // http://jqueryvalidation.org/range-method/
             range: function (value, element, param) {
-                return this.optional(element) || ( value >= param[0] && value <= param[1] );
+                return this.optional(element) || (value >= param[0] && value <= param[1]);
             },
 
             // http://jqueryvalidation.org/step-method/
@@ -1426,7 +1427,7 @@
                     re = new RegExp("\\b" + type + "\\b"),
                     notSupported = type && !re.test(supportedTypes.join()),
                     decimalPlaces = function (num) {
-                        var match = ( "" + num ).match(/(?:\.(\d+))?$/);
+                        var match = ("" + num).match(/(?:\.(\d+))?$/);
                         if (!match) {
                             return 0;
                         }
@@ -1519,9 +1520,9 @@
                         } else {
                             errors = {};
                             message = response || validator.defaultMessage(element, {
-                                    method: method,
-                                    parameters: value
-                                });
+                                method: method,
+                                parameters: value
+                            });
                             errors[element.name] = previous.message = message;
                             validator.invalid[element.name] = true;
                             validator.showErrors(errors);
@@ -1559,8 +1560,8 @@
         // Proxy ajax
         ajax = $.ajax;
         $.ajax = function (settings) {
-            var mode = ( "mode" in settings ? settings : $.ajaxSettings ).mode,
-                port = ( "port" in settings ? settings : $.ajaxSettings ).port;
+            var mode = ("mode" in settings ? settings : $.ajaxSettings).mode,
+                port = ("port" in settings ? settings : $.ajaxSettings).port;
             if (mode === "abort") {
                 if (pendingRequests[port]) {
                     pendingRequests[port].abort();
@@ -1574,7 +1575,7 @@
     return $;
 }));
 
-$.validator.addMethod( "greaterThan", function (value, element, param) {
+$.validator.addMethod("greaterThan", function (value, element, param) {
     // Bind to the blur event of the target in order to revalidate whenever the target field is updated
     var target = $('[name=' + param[0] + ']');
     if (this.settings.onfocusout && target.not(".validate-greaterThan-blur").length) {
@@ -1586,16 +1587,16 @@ $.validator.addMethod( "greaterThan", function (value, element, param) {
     var endTime = parseDate($('[name=' + param[2] + ']').val() + ' ' + value);
 
     return endTime > startTime;
-}, "Bitte überprüfen Sie den angegebenen Zeitraum" );
+}, "Bitte überprüfen Sie den angegebenen Zeitraum");
 
-$.validator.addMethod( "dateInFuture", function (value, element) {
+$.validator.addMethod("dateInFuture", function (value, element) {
     // Bind to the blur event of the target in order to revalidate whenever the target field is updated
     var date = parseDate(value + ' 00:00');
     return date > new Date();
-}, "Das Datum muss in der Zukunft liegen" );
+}, "Das Datum muss in der Zukunft liegen");
 
 function parseDate(input) {
     var parts = input.match(/(\d+)/g);
     // note parts[1]-1
-    return new Date(Date.UTC(parts[2], parts[1]-1, parts[0], parts[3], parts[4], 0));
+    return new Date(Date.UTC(parts[2], parts[1] - 1, parts[0], parts[3], parts[4], 0));
 }

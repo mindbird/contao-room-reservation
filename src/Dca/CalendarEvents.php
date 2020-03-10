@@ -15,16 +15,11 @@ class CalendarEvents
     {
         $span = \Contao\Calendar::calculateSpan($arrRow['startTime'], $arrRow['endTime']);
 
-        if ($span > 0)
-        {
+        if ($span > 0) {
             $date = \Contao\Date::parse(\Contao\Config::get(($arrRow['addTime'] ? 'datimFormat' : 'dateFormat')), $arrRow['startTime']) . $GLOBALS['TL_LANG']['MSC']['cal_timeSeparator'] . \Contao\Date::parse(\Contao\Config::get(($arrRow['addTime'] ? 'datimFormat' : 'dateFormat')), $arrRow['endTime']);
-        }
-        elseif ($arrRow['startTime'] == $arrRow['endTime'])
-        {
+        } elseif ($arrRow['startTime'] == $arrRow['endTime']) {
             $date = \Contao\Date::parse(\Contao\Config::get('dateFormat'), $arrRow['startTime']) . ($arrRow['addTime'] ? ' ' . \Contao\Date::parse(\Contao\Config::get('timeFormat'), $arrRow['startTime']) : '');
-        }
-        else
-        {
+        } else {
             $date = \Contao\Date::parse(\Contao\Config::get('dateFormat'), $arrRow['startTime']) . ($arrRow['addTime'] ? ' ' . \Contao\Date::parse(\Contao\Config::get('timeFormat'), $arrRow['startTime']) . $GLOBALS['TL_LANG']['MSC']['cal_timeSeparator'] . \Contao\Date::parse(\Contao\Config::get('timeFormat'), $arrRow['endTime']) : '');
         }
 
