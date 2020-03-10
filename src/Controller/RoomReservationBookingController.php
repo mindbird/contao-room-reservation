@@ -1,10 +1,17 @@
 <?php
 
+/*
+ * This file is part of [mindbird/contao-room-reservation].
+ *
+ * (c) mindbird
+ *
+ * @license LGPL-3.0-or-later
+ */
+
 namespace Mindbird\Contao\RoomReservation\Controller;
 
 use Contao\CalendarEventsModel;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
-use Contao\CoreBundle\ServiceAnnotation\FrontendModule;
 use Contao\Environment;
 use Contao\FrontendUser;
 use Contao\Input;
@@ -28,7 +35,7 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
 
     protected function getResponse(Template $template, ModuleModel $model, Request $request): ?Response
     {
-        if (Input::post('action') == 'checkAvailability' && Input::post($this->fields['formSubmit']->name) == $this->fields['formSubmit']->value) {
+        if ('checkAvailability' === Input::post('action') && Input::post($this->fields['formSubmit']->name) === $this->fields['formSubmit']->value) {
             return json_encode($this->checkAvailabilityAjax(Input::post('repeat'), Input::post('startDate'), Input::post('startTime'), Input::post('endDate'), Input::post('endTime')));
         }
 
@@ -46,16 +53,16 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
         );
         $user = FrontendUser::getInstance();
 
-        if (Input::post('room_reservation_booking_' . $model->id) === 'FORM_SUBMIT') {
+        if ('FORM_SUBMIT' === Input::post('room_reservation_booking_'.$model->id)) {
             $repeat = 0;
             if (Input::post('repeatTimes') > 0) {
                 $repeat = Input::post('repeatTimes');
             }
 
-            for ($i = 0; $i <= $repeat; $i++) {
-                $addInterval = new \DateInterval('P' . $i * 7 . 'D');
-                $startDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('startDate') . Input::post('startTime'));
-                $endDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('endDate') . Input::post('endTime'));
+            for ($i = 0; $i <= $repeat; ++$i) {
+                $addInterval = new \DateInterval('P'.$i * 7 .'D');
+                $startDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('startDate').Input::post('startTime'));
+                $endDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('endDate').Input::post('endTime'));
                 $startDate->add($addInterval);
                 $endDate->add($addInterval);
 
@@ -69,14 +76,14 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
                     $cem->title = Input::post('eventTitle');
                     $cem->published = true;
                     $cem->addTime = true;
-                    $cem->member = $user !== null ? $user->id : null;
+                    $cem->member = null !== $user ? $user->id : null;
                     $cem->save();
                 }
             }
 
-            if ($model->room_reservation_notification != 0) {
-                $startDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('startDate') . Input::post('startTime'));
-                $endDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('endDate') . Input::post('endTime'));
+            if (0 !== $model->room_reservation_notification) {
+                $startDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('startDate').Input::post('startTime'));
+                $endDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('endDate').Input::post('endTime'));
                 $token = [
                     'room_start_date' => $startDate->format($GLOBALS['TL_CONFIG']['datimFormat']),
                     'room_end_date' => $endDate->format($GLOBALS['TL_CONFIG']['datimFormat']),
@@ -90,8 +97,8 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
                 }
             }
             $jumpToPage = PageModel::findPublishedById($this->jumpTo);
-            return new RedirectResponse(Environment::get('base') . ltrim($jumpToPage->getFrontendUrl('/month/' . $startDate->format('Ym')), '/'));
 
+            return new RedirectResponse(Environment::get('base').ltrim($jumpToPage->getFrontendUrl('/month/'.$startDate->format('Ym')), '/'));
         }
 
         $template->usePricing = $model->room_reservation_use_pricing;
@@ -107,7 +114,7 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
         $template->useEvening = $model->room_reservation_use_evening;
         $template->priceEvening = $model->room_reservation_price_evening;
         $template->eveningStart = $model->room_reservation_evening_start;
-        if ($model->room_reservation_booking_one_day == '1') {
+        if ('1' === $model->room_reservation_booking_one_day) {
             //@TODO
             //$this->fields['endDate']->template = 'form_hidden';
         }

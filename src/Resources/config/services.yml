@@ -1,6 +1,6 @@
 services:
   # Frontend modules
-  Mindbird\Contao\RoomReservation\Controller\BookingController:
+  Mindbird\Contao\RoomReservation\Controller\RoomReservationBookingController:
     arguments:
       - "@mindbird.contao.booking_service"
     tags:

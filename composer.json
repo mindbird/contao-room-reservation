@@ -23,7 +23,10 @@
   },
   "require-dev": {
     "roave/security-advisories": "dev-master",
-    "contao/manager-plugin": "^2.0"
+    "contao/manager-plugin": "^2.0",
+    "vimeo/psalm": "^3.9",
+    "friendsofphp/php-cs-fixer": "^2.12",
+    "phan/phan": "^2.6"
   },
   "autoload": {
     "psr-4": {

@@ -1,5 +1,13 @@
 <?php
 
+/*
+ * This file is part of [mindbird/contao-room-reservation].
+ *
+ * (c) mindbird
+ *
+ * @license LGPL-3.0-or-later
+ */
+
 namespace Mindbird\Contao\RoomReservation\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
@@ -16,7 +24,7 @@ class ContaoRoomReservationExtension extends Extension
     {
         $loader = new YamlFileLoader(
             $container,
-            new FileLocator(__DIR__ . '/../Resources/config')
+            new FileLocator(__DIR__.'/../Resources/config')
         );
 
         $loader->load('services.yml');

@@ -199,7 +199,7 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['__selector__'][] = 'room_reservatio
 $GLOBALS['TL_DCA']['tl_module']['palettes']['__selector__'][] = 'room_reservation_use_half_day';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['__selector__'][] = 'room_reservation_use_evening';
 
-$GLOBALS['TL_DCA']['tl_module']['palettes']['room_reservation'] = '{title_legend},name,headline,type;{archiv_legend},room_event_archive,room_reservation_booking_one_day,jumpTo,room_reservation_start_time,room_reservation_end_time,room_reservation_time_between_entries,room_reservation_min_booking_time,room_reservation_use_pricing,room_reservation_page_agb,room_reservation_notification;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['room_reservation_booking'] = '{title_legend},name,headline,type;{archiv_legend},room_event_archive,room_reservation_booking_one_day,jumpTo,room_reservation_start_time,room_reservation_end_time,room_reservation_time_between_entries,room_reservation_min_booking_time,room_reservation_use_pricing,room_reservation_page_agb,room_reservation_notification;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['subpalettes']['room_reservation_use_pricing'] = 'room_reservation_price_hour,room_reservation_price_day,room_reservation_use_half_hour,room_reservation_use_half_day,room_reservation_use_evening';
 $GLOBALS['TL_DCA']['tl_module']['subpalettes']['room_reservation_use_half_hour'] = 'room_reservation_price_half_hour';
 $GLOBALS['TL_DCA']['tl_module']['subpalettes']['room_reservation_use_half_day'] = 'room_reservation_price_half_day';
