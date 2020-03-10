@@ -17,6 +17,9 @@ use Contao\FormSelectMenu;
 use Contao\FormTextField;
 use Contao\Input;
 use Contao\PageModel;
+use DateInterval;
+use DateTime;
+use Exception;
 use Haste\Http\Response\JsonResponse;
 
 class BookingService
@@ -29,7 +32,7 @@ class BookingService
      * @param $endTime
      * @param $roomEventArchiveId
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return JsonResponse
      * @TODO Refactor return message
@@ -45,10 +48,10 @@ class BookingService
         $events = [];
 
         for ($i = 0; $i <= $repeat; ++$i) {
-            $addInterval = new \DateInterval('P'.$i * 7 .'D');
-            $startDateTime = \DateTime::createFromFormat('d.m.YH:i', $startDate.$startTime);
+            $addInterval = new DateInterval('P'.$i * 7 .'D');
+            $startDateTime = DateTime::createFromFormat('d.m.YH:i', $startDate.$startTime);
             $startDateTime->add($addInterval);
-            $endDateTime = \DateTime::createFromFormat('d.m.YH:i', $endDate.$endTime);
+            $endDateTime = DateTime::createFromFormat('d.m.YH:i', $endDate.$endTime);
             $endDateTime->add($addInterval);
             $availabilityEvent = '<tr><td>'.$startDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']).'</td><td>'.$endDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']).'</td><td class="price"><span class="value"></span>,00 EUR</td><td>';
             if (!$this->checkAvailability($startDateTime, $endDateTime, $roomEventArchiveId)) {
@@ -72,7 +75,7 @@ class BookingService
      *
      * @return bool
      */
-    public function checkAvailability(\DateTime $startDate, \DateTime $endDate, $roomEventArchiveId)
+    public function checkAvailability(DateTime $startDate, DateTime $endDate, $roomEventArchiveId)
     {
         $db = Database::getInstance();
         $result = $db->prepare('SELECT id FROM tl_calendar_events WHERE startTime <= ? AND endTime >= ? AND pid = ?')->execute(
@@ -118,11 +121,11 @@ class BookingService
         $fields['startDate'] = $field;
 
         $timeslot = [];
-        $startTime = new \DateTime($startTime);
-        $endTime = new \DateTime($endTime);
-        $endTime->sub(new \DateInterval('PT'.$minBookingTime.'M'));
+        $startTime = new DateTime($startTime);
+        $endTime = new DateTime($endTime);
+        $endTime->sub(new DateInterval('PT'.$minBookingTime.'M'));
         $time = $startTime;
-        $interval = new \DateInterval('PT15M');
+        $interval = new DateInterval('PT15M');
         while ($time <= $endTime) {
             $timeslot[] = [
                 'label' => $time->format('H:i'),
@@ -151,11 +154,11 @@ class BookingService
         $fields['endDate'] = $field;
 
         $timeslot = [];
-        $startTime = new \DateTime($startTime);
-        $startTime->add(new \DateInterval('PT'.$minBookingTime.'M'));
-        $endTime = new \DateTime($endTime);
+        $startTime = new DateTime($startTime);
+        $startTime->add(new DateInterval('PT'.$minBookingTime.'M'));
+        $endTime = new DateTime($endTime);
         $time = $startTime;
-        $interval = new \DateInterval('PT15M');
+        $interval = new DateInterval('PT15M');
         while ($time <= $endTime) {
             $timeslot[] = [
                 'label' => $time->format('H:i'),

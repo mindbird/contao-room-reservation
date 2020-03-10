@@ -18,6 +18,8 @@ use Contao\Input;
 use Contao\ModuleModel;
 use Contao\PageModel;
 use Contao\Template;
+use DateInterval;
+use DateTime;
 use Mindbird\Contao\RoomReservation\Service\BookingService;
 use NotificationCenter\Model\Notification;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -60,9 +62,9 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
             }
 
             for ($i = 0; $i <= $repeat; ++$i) {
-                $addInterval = new \DateInterval('P'.$i * 7 .'D');
-                $startDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('startDate').Input::post('startTime'));
-                $endDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('endDate').Input::post('endTime'));
+                $addInterval = new DateInterval('P'.$i * 7 .'D');
+                $startDate = DateTime::createFromFormat('d.m.YH:i', Input::post('startDate').Input::post('startTime'));
+                $endDate = DateTime::createFromFormat('d.m.YH:i', Input::post('endDate').Input::post('endTime'));
                 $startDate->add($addInterval);
                 $endDate->add($addInterval);
 
@@ -82,8 +84,8 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
             }
 
             if (0 !== $model->room_reservation_notification) {
-                $startDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('startDate').Input::post('startTime'));
-                $endDate = \DateTime::createFromFormat('d.m.YH:i', Input::post('endDate').Input::post('endTime'));
+                $startDate = DateTime::createFromFormat('d.m.YH:i', Input::post('startDate').Input::post('startTime'));
+                $endDate = DateTime::createFromFormat('d.m.YH:i', Input::post('endDate').Input::post('endTime'));
                 $token = [
                     'room_start_date' => $startDate->format($GLOBALS['TL_CONFIG']['datimFormat']),
                     'room_end_date' => $endDate->format($GLOBALS['TL_CONFIG']['datimFormat']),

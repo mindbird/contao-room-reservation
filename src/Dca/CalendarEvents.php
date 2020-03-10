@@ -10,6 +10,11 @@
 
 namespace Mindbird\Contao\RoomReservation\Dca;
 
+use Contao\Calendar;
+use Contao\Config;
+use Contao\Date;
+use Contao\MemberModel;
+
 class CalendarEvents
 {
     /**
@@ -21,18 +26,18 @@ class CalendarEvents
      */
     public function listEvents($arrRow)
     {
-        $span = \Contao\Calendar::calculateSpan($arrRow['startTime'], $arrRow['endTime']);
+        $span = Calendar::calculateSpan($arrRow['startTime'], $arrRow['endTime']);
 
         if ($span > 0) {
-            $date = \Contao\Date::parse(\Contao\Config::get(($arrRow['addTime'] ? 'datimFormat' : 'dateFormat')), $arrRow['startTime']).$GLOBALS['TL_LANG']['MSC']['cal_timeSeparator'].\Contao\Date::parse(\Contao\Config::get(($arrRow['addTime'] ? 'datimFormat' : 'dateFormat')), $arrRow['endTime']);
+            $date = Date::parse(Config::get(($arrRow['addTime'] ? 'datimFormat' : 'dateFormat')), $arrRow['startTime']).$GLOBALS['TL_LANG']['MSC']['cal_timeSeparator']. Date::parse(Config::get(($arrRow['addTime'] ? 'datimFormat' : 'dateFormat')), $arrRow['endTime']);
         } elseif ($arrRow['startTime'] === $arrRow['endTime']) {
-            $date = \Contao\Date::parse(\Contao\Config::get('dateFormat'), $arrRow['startTime']).($arrRow['addTime'] ? ' '.\Contao\Date::parse(\Contao\Config::get('timeFormat'), $arrRow['startTime']) : '');
+            $date = Date::parse(Config::get('dateFormat'), $arrRow['startTime']).($arrRow['addTime'] ? ' '. Date::parse(Config::get('timeFormat'), $arrRow['startTime']) : '');
         } else {
-            $date = \Contao\Date::parse(\Contao\Config::get('dateFormat'), $arrRow['startTime']).($arrRow['addTime'] ? ' '.\Contao\Date::parse(\Contao\Config::get('timeFormat'), $arrRow['startTime']).$GLOBALS['TL_LANG']['MSC']['cal_timeSeparator'].\Contao\Date::parse(\Contao\Config::get('timeFormat'), $arrRow['endTime']) : '');
+            $date = Date::parse(Config::get('dateFormat'), $arrRow['startTime']).($arrRow['addTime'] ? ' '. Date::parse(Config::get('timeFormat'), $arrRow['startTime']).$GLOBALS['TL_LANG']['MSC']['cal_timeSeparator']. Date::parse(Config::get('timeFormat'), $arrRow['endTime']) : '');
         }
 
         if ($arrRow['member'] > 0) {
-            $member = \Contao\MemberModel::findByPk($arrRow['member']);
+            $member = MemberModel::findByPk($arrRow['member']);
             if (null !== $member) {
                 return '<div class="tl_content_left">'.$arrRow['title'].' <span style="color:#999;padding-left:3px">['.$date.']</span> '.$member->firstname.' '.$member->lastname.'</div>';
             }

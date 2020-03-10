@@ -10,4 +10,4 @@ services:
   mindbird.contao.booking_service:
     class: Mindbird\Contao\RoomReservation\Services\BookingService
 
-  Mindbird\Contao\RoomReservation\Services\BookingService: '@mindbird.contao.booking_service'
+  Mindbird\Contao\RoomReservation\Service\BookingService: '@mindbird.contao.booking_service'
