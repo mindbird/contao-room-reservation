@@ -1,7 +1,8 @@
 frontend_room_reservation:
   path: /_room_reservation/availability
+  controller: Mindbird\Contao\RoomReservation\Controller\AvailabilityController::checkAvailability
   defaults:
-    _controller: ContaoRoomReservationBundle:Availability:checkAvailability
     _scope: frontend
     _token_check: true
   methods: [POST]
+

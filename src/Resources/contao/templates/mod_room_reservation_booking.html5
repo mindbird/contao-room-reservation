@@ -158,7 +158,8 @@
                         startTime: $('[name=startTime]').val(),
                         endDate: $('[name=endDate]').val(),
                         endTime: $('[name=endTime]').val(),
-                        repeat: $('[name=repeatTimes]').val()
+                        repeat: $('[name=repeatTimes]').val(),
+                        roomId: '<?= $this->roomId ?>'
                     }
                 }).done(function (data) {
                     $('.events table tbody').html(data.events.join('<br>'));

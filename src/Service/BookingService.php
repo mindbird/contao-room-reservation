@@ -10,7 +10,6 @@
 
 namespace Mindbird\Contao\RoomReservation\Service;
 
-use Contao\Database;
 use Contao\FormCheckBox;
 use Contao\FormHidden;
 use Contao\FormSelectMenu;
@@ -19,11 +18,20 @@ use Contao\Input;
 use Contao\PageModel;
 use DateInterval;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Haste\Http\Response\JsonResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class BookingService
 {
+    /** @var EntityManagerInterface */
+    protected $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     /**
      * @param $repeat
      * @param $startDate
@@ -44,7 +52,8 @@ class BookingService
         $endDate,
         $endTime,
         $roomEventArchiveId
-    ) {
+    ): array
+    {
         $events = [];
 
         for ($i = 0; $i <= $repeat; ++$i) {
@@ -63,31 +72,34 @@ class BookingService
             $events[] = $availabilityEvent.'</td>';
         }
 
-        return new JsonResponse([
+        return [
             'status' => true,
             'msg' => '',
             'events' => $events,
-        ]);
+        ];
     }
 
     /**
+     * @param DateTime $startDate
+     * @param DateTime $endDate
      * @param int $roomEventArchiveId
      *
      * @return bool
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function checkAvailability(DateTime $startDate, DateTime $endDate, $roomEventArchiveId)
+    public function checkAvailability(DateTime $startDate, DateTime $endDate, $roomEventArchiveId): bool
     {
-        $db = Database::getInstance();
-        $result = $db->prepare('SELECT id FROM tl_calendar_events WHERE startTime <= ? AND endTime >= ? AND pid = ?')->execute(
-            $endDate->format('U') + $this->room_reservation_time_between_entries * 60,
-            $startDate->format('U'),
-            $roomEventArchiveId
-        );
+        $query = $this->entityManager->getConnection()->prepare('SELECT id FROM tl_calendar_events WHERE startTime <= :startTime AND endTime >= :endTime AND pid = :pid');
+        $query->bindValue('startTime', $endDate->format('U') + $this->room_reservation_time_between_entries * 60);
+        $query->bindValue('endTime', $startDate->format('U'));
+        $query->bindValue('pid', $roomEventArchiveId);
+        $query->execute();
 
-        return 0 === $result->numRows;
+        return 0 === $query->rowCount();
     }
 
-    public function initFields($moduleId, $startTime, $endTime, $minBookingTime, $pageAgbId) {
+    public function initFields($moduleId, $startTime, $endTime, $minBookingTime, $pageAgbId): array
+    {
 
         $fields = [];
 

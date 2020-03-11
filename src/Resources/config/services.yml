@@ -6,8 +6,15 @@ services:
     tags:
       - { name: contao.frontend_module, category: miscellaneous }
 
+  Mindbird\Contao\RoomReservation\Controller\AvailabilityController:
+    public: true
+    arguments:
+      - "@mindbird.contao.booking_service"
+
   # Services
   mindbird.contao.booking_service:
     class: Mindbird\Contao\RoomReservation\Service\BookingService
+    arguments:
+      - '@doctrine.orm.entity_manager'
 
   Mindbird\Contao\RoomReservation\Service\BookingService: '@mindbird.contao.booking_service'

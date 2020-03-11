@@ -129,6 +129,7 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
         $template->useEvening = $model->room_reservation_use_evening;
         $template->priceEvening = $model->room_reservation_price_evening;
         $template->eveningStart = $model->room_reservation_evening_start;
+        $template->roomId = $model->room_event_archive;
         if ('1' === $model->room_reservation_booking_one_day) {
             //@TODO
             //$this->fields['endDate']->template = 'form_hidden';
