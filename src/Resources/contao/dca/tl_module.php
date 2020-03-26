@@ -1,7 +1,7 @@
 <?php
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['room_event_archive'] = [
-    'default' => '0',
+    'default' => 0,
     'exclude' => true,
     'inputType' => 'select',
     'foreignKey' => 'tl_calendar.title',
@@ -109,7 +109,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_price_evening'] = [
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_evening_start'] = [
     'inputType' => 'select',
-    'options' => $timeslot,
+    'options_callback' => array(\Mindbird\Contao\RoomReservation\Dca\Module::class, 'optionsCallbackTimeslots'),
     'eval' => [
         'mandatory' => true,
         'tl_class' => 'w50'
