@@ -65,7 +65,7 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
         );
 
         $user = FrontendUser::getInstance();
-        if ('FORM_SUBMIT' === Input::post('room_reservation_booking_'.$model->id)) {
+        if ('room_reservation_booking_'.$model->id === Input::post('FORM_SUBMIT')) {
             $repeat = 0;
             if (Input::post('repeatTimes') > 0) {
                 $repeat = Input::post('repeatTimes');
