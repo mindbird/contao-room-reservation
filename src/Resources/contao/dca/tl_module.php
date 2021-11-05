@@ -150,7 +150,6 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_jump_to'] = [
 $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_page_agb'] = [
     'inputType' => 'pageTree',
     'eval' => [
-        'mandatory' => true,
         'tl_class' => 'clr',
         'fieldType' => 'radio',
     ],
