@@ -59,8 +59,8 @@
 
 <script type="text/javascript">
     $(function () {
-        var minBookingTime = parseInt('<?= $this->minBookingTime ?>');
-        var startDate = new Date();
+        const minBookingTime = parseInt('<?= $this->minBookingTime ?>');
+        const startDate = new Date();
         startDate.setDate(startDate.getDate());
         $('[name="startDate"]').datepicker({
             language: 'de-DE',

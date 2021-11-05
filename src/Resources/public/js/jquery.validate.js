@@ -1592,7 +1592,9 @@ $.validator.addMethod("greaterThan", function (value, element, param) {
 $.validator.addMethod("dateInFuture", function (value, element) {
     // Bind to the blur event of the target in order to revalidate whenever the target field is updated
     var date = parseDate(value + ' 00:00');
-    return date > new Date();
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return date > now;
 }, "Das Datum muss in der Zukunft liegen");
 
 function parseDate(input) {
