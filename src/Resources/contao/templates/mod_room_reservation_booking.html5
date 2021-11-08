@@ -45,9 +45,9 @@
     <div class="row booking">
         <div class="column"><?= $this->fields['agb']->parse() ?></div>
     </div>
-    <div class="row booking">
+    <div class="row reservation">
         <div class="column">
-            <button>Reservieren</button>
+            <button type="submit">Reservieren</button>
         </div>
         <div class="column"></div>
     </div>
@@ -119,6 +119,9 @@
                 error.remove();
             },
             rules: {
+                eventTitle: {
+                    required: true
+                },
                 startDate: {
                     required: true,
                     //dateInFuture: true
@@ -164,7 +167,7 @@
                 }).done(function (data) {
                     $('.events table tbody').html(data.events.join('<br>'));
                     if (data.status) {
-                        $('.booking').show();
+                        $('.reservation').show();
                     }
                     $('.events').show();
                     if (usePricing) {
