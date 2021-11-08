@@ -148,6 +148,7 @@
             e.preventDefault();
             $('.events').hide();
             $('.booking').hide();
+            $('.reservation').hide();
             if ($('.room-reservation').valid()) {
                 $.ajax({
                     method: 'POST',
