@@ -55,6 +55,7 @@ class BookingService
     ): array
     {
         $events = [];
+        $status = true;
 
         for ($i = 0; $i <= $repeat; ++$i) {
             $addInterval = new DateInterval('P'.$i * 7 .'D');
@@ -65,7 +66,7 @@ class BookingService
             $availabilityEvent = '<tr><td>'.$startDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']).'</td><td>'.$endDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']).'</td><td class="price"><span class="value"></span>,00 EUR</td><td>';
             if (!$this->checkAvailability($startDateTime, $endDateTime, $roomEventArchiveId)) {
                 $availabilityEvent .= '<span class="error">nicht verfügbar</span>';
-                $return['status'] = false;
+                $status = false;
             } else {
                 $availabilityEvent .= '<span>verfügbar</span>';
             }
@@ -73,7 +74,7 @@ class BookingService
         }
 
         return [
-            'status' => true,
+            'status' => $status,
             'msg' => '',
             'events' => $events,
         ];
