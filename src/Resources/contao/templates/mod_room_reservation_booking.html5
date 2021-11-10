@@ -240,6 +240,7 @@
         $('.events').hide();
         $('.price').hide();
         $('.booking').hide();
+        $('.reservation').hide();
         $('.repeatTimes').hide();
     });
 </script>

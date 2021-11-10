@@ -26,7 +26,6 @@ class AvailabilityController extends AbstractFragmentController
      */
     public function checkAvailability(): JsonResponse
     {
-        //@TODO Service und so
         return new JsonResponse($this->bookingService->checkAvailabilityAjax(
             Input::post('repeat'),
             Input::post('startDate'),
