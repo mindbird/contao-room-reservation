@@ -3,7 +3,7 @@
 <?php $this->block('content'); ?>
 <form class="room-reservation" method="post">
     <?= $this->fields['formSubmit']->parse() ?>
-    <input name="REQUEST_TOKEN" type="hidden" value="<?= REQUEST_TOKEN ?>">
+    <input name="REQUEST_TOKEN" type="hidden" value="<?= $this->requestToken ?>">
     <div class="row">
         <div class="column"><?= $this->fields['eventTitle']->parse() ?></div>
     </div>
@@ -163,7 +163,8 @@
                         endDate: $('[name=endDate]').val(),
                         endTime: $('[name=endTime]').val(),
                         repeat: $('[name=repeatTimes]').val(),
-                        roomId: '<?= $this->roomId ?>'
+                        roomId: '<?= $this->roomId ?>',
+                        timeBetweenEntries: '<?= $this->timeBetweenEntries ?>'
                     }
                 }).done(function (data) {
                     $('.events table tbody').html(data.events.join('<br>'));

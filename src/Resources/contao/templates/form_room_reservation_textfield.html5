@@ -16,7 +16,7 @@
     <?php $this->block('field'); ?>
     <input class="text<?php if ($this->hideInput) echo ' password'; ?><?php if ($this->class) echo ' ' . $this->class; ?>" id="ctrl_<?= $this->id ?>" name="<?= $this->name ?>"
            type="<?= $this->type ?>"
-           value="<?= specialchars($this->value) ?>"<?= $this->getAttributes() ?>>
+           value="<?= \Contao\StringUtil::specialchars($this->value) ?>"<?= $this->getAttributes() ?>>
     <div class="error"><?= $this->getErrorAsString() ?></div>
 </div>
 <?php $this->endblock(); ?>

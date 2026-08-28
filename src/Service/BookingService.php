@@ -10,26 +10,30 @@
 
 namespace Mindbird\Contao\RoomReservation\Service;
 
-use Contao\FormCheckBox;
+use Contao\FormCheckbox;
 use Contao\FormHidden;
-use Contao\FormSelectMenu;
-use Contao\FormTextField;
+use Contao\FormSelect;
+use Contao\FormText;
 use Contao\Input;
 use Contao\PageModel;
+use Contao\CoreBundle\Routing\ContentUrlGenerator;
 use DateInterval;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class BookingService
 {
     /** @var EntityManagerInterface */
     protected $entityManager;
+    /** @var ContentUrlGenerator */
+    protected $contentUrlGenerator;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, ContentUrlGenerator $contentUrlGenerator)
     {
         $this->entityManager = $entityManager;
+        $this->contentUrlGenerator = $contentUrlGenerator;
     }
 
     /**
@@ -42,29 +46,29 @@ class BookingService
      *
      * @throws Exception
      *
-     * @return JsonResponse
      * @TODO Refactor return message
      */
     public function checkAvailabilityAjax(
-        $repeat,
-        $startDate,
-        $startTime,
-        $endDate,
-        $endTime,
-        $roomEventArchiveId
+        int $repeat,
+        string $startDate,
+        string $startTime,
+        string $endDate,
+        string $endTime,
+        int $roomEventArchiveId,
+        int $timeBetweenEntries
     ): array
     {
         $events = [];
         $status = true;
 
         for ($i = 0; $i <= $repeat; ++$i) {
-            $addInterval = new DateInterval('P'.$i * 7 .'D');
-            $startDateTime = DateTime::createFromFormat('d.m.YH:i', $startDate.$startTime);
+            $addInterval = new DateInterval('P'.(7 * $i).'D');
+            $startDateTime = $this->createDateTime($startDate, $startTime);
             $startDateTime->add($addInterval);
-            $endDateTime = DateTime::createFromFormat('d.m.YH:i', $endDate.$endTime);
+            $endDateTime = $this->createDateTime($endDate, $endTime);
             $endDateTime->add($addInterval);
             $availabilityEvent = '<tr><td>'.$startDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']).'</td><td>'.$endDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']).'</td><td class="price"><span class="value"></span>,00 EUR</td><td>';
-            if (!$this->checkAvailability($startDateTime, $endDateTime, $roomEventArchiveId)) {
+            if (!$this->checkAvailability($startDateTime, $endDateTime, $roomEventArchiveId, $timeBetweenEntries)) {
                 $availabilityEvent .= '<span class="error">nicht verfügbar</span>';
                 $status = false;
             } else {
@@ -86,17 +90,19 @@ class BookingService
      * @param int $roomEventArchiveId
      *
      * @return bool
-     * @throws \Doctrine\DBAL\DBALException
      */
-    public function checkAvailability(DateTime $startDate, DateTime $endDate, $roomEventArchiveId): bool
+    public function checkAvailability(DateTimeInterface $startDate, DateTimeInterface $endDate, int $roomEventArchiveId, int $timeBetweenEntries): bool
     {
-        $query = $this->entityManager->getConnection()->prepare('SELECT id FROM tl_calendar_events WHERE startTime <= :startTime AND endTime >= :endTime AND pid = :pid');
-        $query->bindValue('startTime', $endDate->format('U') + $this->room_reservation_time_between_entries * 60);
-        $query->bindValue('endTime', $startDate->format('U'));
-        $query->bindValue('pid', $roomEventArchiveId);
-        $query->execute();
+        $result = $this->entityManager->getConnection()->executeQuery(
+            'SELECT 1 FROM tl_calendar_events WHERE startTime <= :startTime AND endTime >= :endTime AND pid = :pid LIMIT 1',
+            [
+                'startTime' => (int) $endDate->format('U') + ($timeBetweenEntries * 60),
+                'endTime' => (int) $startDate->format('U'),
+                'pid' => $roomEventArchiveId,
+            ]
+        );
 
-        return 0 === $query->rowCount();
+        return false === $result->fetchOne();
     }
 
     public function initFields($moduleId, $startTime, $endTime, $minBookingTime, $pageAgbId): array
@@ -116,7 +122,7 @@ class BookingService
         $field->value = 'room_reservation_booking_'.$moduleId;
         $fields['formSubmit'] = $field;
 
-        $field = new FormTextField();
+        $field = new FormText();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'eventTitle';
         $field->id = 'eventTitle';
@@ -124,7 +130,7 @@ class BookingService
         $field->value = Input::post('eventTitle');
         $fields['eventTitle'] = $field;
 
-        $field = new FormTextField();
+        $field = new FormText();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'startDate';
         $field->id = 'startDate';
@@ -147,7 +153,7 @@ class BookingService
             $time->add($interval);
         }
 
-        $field = new FormSelectMenu();
+        $field = new FormSelect();
         $field->template = 'form_room_reservation_select';
         $field->name = 'startTime';
         $field->id = 'startTime';
@@ -157,7 +163,7 @@ class BookingService
         $field->value = Input::post('startTime');
         $fields['startTime'] = $field;
 
-        $field = new FormTextField();
+        $field = new FormText();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'endDate';
         $field->id = 'endDate';
@@ -166,7 +172,7 @@ class BookingService
         $field->value = '' === $date ? date('d.m.Y') : $date;
         $fields['endDate'] = $field;
 
-        $field = new FormSelectMenu();
+        $field = new FormSelect();
         $field->template = 'form_room_reservation_select';
         $field->name = 'endTime';
         $field->id = 'endTime';
@@ -176,7 +182,7 @@ class BookingService
         $field->value = Input::post('endTime');
         $fields['endTime'] = $field;
 
-        $field = new FormCheckBox();
+        $field = new FormCheckbox();
         $field->template = 'form_room_reservation_checkbox';
         $field->name = 'repeat';
         $field->id = 'repeat';
@@ -186,7 +192,7 @@ class BookingService
         ];
         $fields['repeat'] = $field;
 
-        $field = new FormTextField();
+        $field = new FormText();
         $field->template = 'form_room_reservation_textfield';
         $field->name = 'repeatTimes';
         $field->id = 'repeatTimes';
@@ -196,14 +202,14 @@ class BookingService
         $fields['repeatTimes'] = $field;
 
         /** @var PageModel $pageAgbModel */
-        $pageAgbModel = \PageModel::findByPk($pageAgbId);
+        $pageAgbModel = PageModel::findByPk($pageAgbId);
         if ($pageAgbModel) {
-            $pageAgb = $pageAgbModel->getFrontendUrl();
+            $pageAgb = $this->contentUrlGenerator->generate($pageAgbModel);
             $label = 'Hiermit stimme ich den <a href="'.$pageAgb.'" target="_blank">AGB</a> zu';
         } else {
             $label = 'Hiermit stimme ich den AGB zu';
         }
-        $field = new FormCheckBox();
+        $field = new FormCheckbox();
         $field->template = 'form_room_reservation_checkbox';
         $field->name = 'agb';
         $field->id = 'agb';
@@ -215,5 +221,17 @@ class BookingService
         $fields['agb'] = $field;
 
         return $fields;
+    }
+
+    private function createDateTime(string $date, string $time): DateTime
+    {
+        $dateTime = DateTime::createFromFormat('!d.m.Y H:i', $date.' '.$time);
+        $errors = DateTime::getLastErrors();
+
+        if (false === $dateTime || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count']))) {
+            throw new Exception('Invalid reservation date or time.');
+        }
+
+        return $dateTime;
     }
 }

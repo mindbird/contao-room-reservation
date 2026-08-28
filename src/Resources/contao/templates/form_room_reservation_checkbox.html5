@@ -12,7 +12,7 @@
     <p class="error"><?php echo $this->getErrorAsString(); ?></p>
     <?php endif; ?>
 
-    <!--<input type="hidden" name="<?php echo $this->name; ?>" value="">-->
+    <input type="hidden" name="<?php echo $this->name; ?>" value="">
 
     <?php foreach ($this->getOptions() as $option): ?>
     <div>

@@ -14,7 +14,7 @@ use Contao\CalendarEventsModel;
 use Contao\Controller;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Exception\PageNotFoundException;
-use Contao\Environment;
+use Contao\CoreBundle\Routing\ContentUrlGenerator;
 use Contao\FrontendUser;
 use Contao\Input;
 use Contao\ModuleModel;
@@ -23,18 +23,23 @@ use Contao\Template;
 use DateInterval;
 use DateTime;
 use Mindbird\Contao\RoomReservation\Service\BookingService;
-use NotificationCenter\Model\Notification;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Terminal42\NotificationCenterBundle\NotificationCenter;
 
 class RoomReservationBookingController extends AbstractFrontendModuleController
 {
     protected $bookingService;
+    protected $notificationCenter;
+    protected $contentUrlGenerator;
 
-    public function __construct(BookingService $bookingService)
+    public function __construct(BookingService $bookingService, NotificationCenter $notificationCenter, ContentUrlGenerator $contentUrlGenerator)
     {
         $this->bookingService = $bookingService;
+        $this->notificationCenter = $notificationCenter;
+        $this->contentUrlGenerator = $contentUrlGenerator;
     }
 
     protected function getResponse(Template $template, ModuleModel $model, Request $request): ?Response
@@ -68,23 +73,26 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
         if ('room_reservation_booking_'.$model->id === Input::post('FORM_SUBMIT')) {
             $repeat = 0;
             if (Input::post('repeatTimes') > 0) {
-                $repeat = Input::post('repeatTimes');
+                $repeat = (int) Input::post('repeatTimes');
             }
 
-            for ($i = 0; $i <= $repeat; ++$i) {
-                $addInterval = new DateInterval('P'.$i * 7 .'D');
-                $startDate = DateTime::createFromFormat('d.m.YH:i', Input::post('startDate').Input::post('startTime'));
-                $endDate = DateTime::createFromFormat('d.m.YH:i', Input::post('endDate').Input::post('endTime'));
-                $startDate->add($addInterval);
-                $endDate->add($addInterval);
+            $startDate = $this->createDateTime((string) Input::post('startDate'), (string) Input::post('startTime'));
+            $endDate = $this->createDateTime((string) Input::post('endDate'), (string) Input::post('endTime'));
 
-                if ($this->bookingService->checkAvailability($startDate, $endDate, $model->room_event_archive)) {
+            for ($i = 0; $i <= $repeat; ++$i) {
+                $addInterval = new DateInterval('P'.(7 * $i).'D');
+                $bookingStartDate = clone $startDate;
+                $bookingEndDate = clone $endDate;
+                $bookingStartDate->add($addInterval);
+                $bookingEndDate->add($addInterval);
+
+                if ($this->bookingService->checkAvailability($bookingStartDate, $bookingEndDate, (int) $model->room_event_archive, (int) $model->room_reservation_time_between_entries)) {
                     $cem = new CalendarEventsModel();
                     $cem->pid = $model->room_event_archive;
-                    $cem->startDate = $startDate->format('U');
-                    $cem->startTime = $startDate->format('U');
-                    $cem->endDate = $endDate->format('U');
-                    $cem->endTime = $endDate->format('U');
+                    $cem->startDate = $bookingStartDate->format('U');
+                    $cem->startTime = $bookingStartDate->format('U');
+                    $cem->endDate = $bookingEndDate->format('U');
+                    $cem->endTime = $bookingEndDate->format('U');
                     $cem->title = Input::post('eventTitle');
                     $cem->published = true;
                     $cem->addTime = true;
@@ -94,8 +102,6 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
             }
 
             if (0 !== $model->room_reservation_notification) {
-                $startDate = DateTime::createFromFormat('d.m.YH:i', Input::post('startDate').Input::post('startTime'));
-                $endDate = DateTime::createFromFormat('d.m.YH:i', Input::post('endDate').Input::post('endTime'));
                 $token = [
                     'room_start_date' => $startDate->format($GLOBALS['TL_CONFIG']['datimFormat']),
                     'room_end_date' => $endDate->format($GLOBALS['TL_CONFIG']['datimFormat']),
@@ -103,17 +109,19 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
                     'room_repeat_times' => $repeat,
                     'room_event_title' => Input::post('eventTitle'),
                 ];
-                $notification = Notification::findByPk($model->room_reservation_notification);
-                if (null !== $notification) {
-                    $notification->send($token);
+
+                if (null !== $user && '' !== (string) $user->email) {
+                    $token['member_email'] = $user->email;
                 }
+
+                $this->notificationCenter->sendNotification((int) $model->room_reservation_notification, $token);
             }
             $jumpToPage = PageModel::findPublishedById($model->room_reservation_jump_to);
             if ($jumpToPage === null) {
                 throw new PageNotFoundException('Page #' . $model->room_reservation_jump_to);
             }
 
-            return new RedirectResponse(Environment::get('base').ltrim($jumpToPage->getFrontendUrl('/month/'.$startDate->format('Ym')), '/'));
+            return new RedirectResponse($this->contentUrlGenerator->generate($jumpToPage, ['parameters' => '/month/'.$startDate->format('Ym')]));
         }
 
         $template->usePricing = $model->room_reservation_use_pricing;
@@ -130,11 +138,24 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
         $template->priceEvening = $model->room_reservation_price_evening;
         $template->eveningStart = $model->room_reservation_evening_start;
         $template->roomId = $model->room_event_archive;
+        $template->timeBetweenEntries = $model->room_reservation_time_between_entries;
         if ('1' === $model->room_reservation_booking_one_day) {
             //@TODO
             //$this->fields['endDate']->template = 'form_hidden';
         }
 
         return $template->getResponse();
+    }
+
+    private function createDateTime(string $date, string $time): DateTime
+    {
+        $dateTime = DateTime::createFromFormat('!d.m.Y H:i', $date.' '.$time);
+        $errors = DateTime::getLastErrors();
+
+        if (false === $dateTime || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count']))) {
+            throw new BadRequestHttpException('Invalid reservation date or time.');
+        }
+
+        return $dateTime;
     }
 }
