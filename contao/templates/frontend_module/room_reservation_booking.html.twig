@@ -1,0 +1,204 @@
+{% extends '@Contao/frontend_module/_base.html.twig' %}
+
+{% block content %}
+    <form class="room-reservation" method="post">
+        {{ fields.formSubmit.parse()|raw }}
+        <input name="REQUEST_TOKEN" type="hidden" value="{{ contao.request_token }}">
+        <div class="row"><div class="column">{{ fields.eventTitle.parse()|raw }}</div></div>
+        <div class="row">
+            <div class="column">{{ fields.startDate.parse()|raw }}</div>
+            <div class="column">{{ fields.startTime.parse()|raw }}</div>
+        </div>
+        <div class="row">
+            <div class="column">{{ fields.endDate.parse()|raw }}</div>
+            <div class="column">{{ fields.endTime.parse()|raw }}</div>
+        </div>
+        <div class="row">
+            <div class="column">{{ fields.repeat.parse()|raw }}</div>
+            <div class="column repeatTimes">{{ fields.repeatTimes.parse()|raw }}</div>
+        </div>
+        <div class="row"><div class="column"><button id="calcPrice">Verfügbarkeit prüfen</button></div><div class="column"></div></div>
+        <div class="row events">
+            <div class="column">
+                <table>
+                    <thead><tr><td>Start</td><td>Ende</td><td class="price">Preis</td><td>Status</td></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row booking"><div class="column">{{ fields.agb.parse()|raw }}</div></div>
+        <div class="row reservation"><div class="column"><button type="submit">Reservieren</button></div><div class="column"></div></div>
+    </form>
+
+    {% if noTimeslotAvailable|default %}
+        <p>In dem angegebenen Zeitraum ist kein freier Raum verfügbar.</p>
+    {% endif %}
+
+    <script>
+        $(function () {
+            const minBookingTime = parseInt({{ minBookingTime|json_encode|raw }});
+            const roomId = {{ roomId|json_encode|raw }};
+            const timeBetweenEntries = {{ timeBetweenEntries|json_encode|raw }};
+            const usePricing = parseInt({{ usePricing|json_encode|raw }});
+            const dayPrice = parseFloat({{ priceDay|json_encode|raw }});
+            const useHalfDay = parseInt({{ useHalfDay|json_encode|raw }});
+            const halfDayPrice = parseFloat({{ priceHalfDay|json_encode|raw }});
+            const hourPrice = parseFloat({{ priceHour|json_encode|raw }});
+            const useHalfHour = parseInt({{ useHalfHour|json_encode|raw }});
+            const halfHourPrice = parseFloat({{ priceHalfHour|json_encode|raw }});
+            const useEvening = parseInt({{ useEvening|json_encode|raw }});
+            const eveningPrice = parseFloat({{ priceEvening|json_encode|raw }});
+            const eveningStart = parseFloat({{ eveningStart|json_encode|raw }});
+            const startTimeLimit = {{ startTime|json_encode|raw }};
+            const endTimeLimit = {{ endTime|json_encode|raw }};
+            const startDate = new Date();
+
+            $('[name="startDate"]').datepicker({
+                language: 'de-DE',
+                autoHide: true,
+                startDate: startDate,
+                pick: function () {
+                    if ($('[name="startDate"]').datepicker('getDate') > $('[name="endDate"]').datepicker('getDate')) {
+                        $('[name="endDate"]').val('');
+                    }
+                    $('[name="endDate"]').datepicker('setStartDate', $('[name="startDate"]').datepicker('getDate'));
+                    $('[name="endDate"]').datepicker('setDate', $('[name="startDate"]').datepicker('getDate'));
+                    $('[name=startTime]').change();
+                }
+            });
+            $('[name="endDate"]').datepicker({
+                language: 'de-DE',
+                autoHide: true,
+                startDate: startDate,
+                pick: function () {
+                    $('[name=startTime]').change();
+                }
+            });
+
+            $('[name=startTime]').change(function () {
+                const value = $(this).val();
+                const startValue = parseFloat(value[0] + value[1]) + parseFloat(value[3] + value[4]) / 60;
+                $('[name=endTime] option').each(function () {
+                    if ($(this).val()[4] !== value[4]) {
+                        $(this).hide().prop('disabled', true);
+                    } else {
+                        const endValue = parseFloat($(this).val()[0] + $(this).val()[1]) + parseFloat($(this).val()[3] + $(this).val()[4]) / 60;
+                        const difference = endValue - startValue - parseFloat(minBookingTime / 60);
+                        if ($('[name="startDate"]').datepicker('getDate', 'U') === $('[name="endDate"]').datepicker('getDate', 'U') && difference < 0) {
+                            $(this).hide().prop('disabled', true);
+                        } else {
+                            $(this).show().prop('disabled', false);
+                        }
+                    }
+                });
+                $('[name=endTime]').val('');
+            });
+
+            $('[name=repeat]').click(function () {
+                $('.repeatTimes').toggle($(this).is(':checked'));
+            });
+
+            $('.room-reservation').validate({
+                errorPlacement: function (error, element) {
+                    element.closest('.formElement').find('div.error').html(error.html());
+                },
+                success: function (error) {
+                    error.remove();
+                },
+                rules: {
+                    eventTitle: {required: true},
+                    startDate: {required: true},
+                    endDate: 'required',
+                    startTime: 'required',
+                    endTime: {required: true, greaterThan: ['startTime', 'startDate', 'endDate']},
+                    agb: 'required',
+                    repeatTimes: {required: true, min: 1, step: 1, digits: true}
+                }
+            });
+
+            $('[name=startTime]').change();
+
+            $('#calcPrice').click(function (event) {
+                event.preventDefault();
+                $('.events, .booking, .reservation').hide();
+                if ($('.room-reservation').valid()) {
+                    $.ajax({
+                        method: 'POST',
+                        dataType: 'json',
+                        url: '/_room_reservation/availability',
+                        data: {
+                            FORM_SUBMIT: $('[name=FORM_SUBMIT]').val(),
+                            REQUEST_TOKEN: $('[name=REQUEST_TOKEN]').val(),
+                            action: 'checkAvailability',
+                            startDate: $('[name=startDate]').val(),
+                            startTime: $('[name=startTime]').val(),
+                            endDate: $('[name=endDate]').val(),
+                            endTime: $('[name=endTime]').val(),
+                            repeat: $('[name=repeatTimes]').val(),
+                            roomId: roomId,
+                            timeBetweenEntries: timeBetweenEntries
+                        }
+                    }).done(function (data) {
+                        $('.events table tbody').html(data.events.join('<br>'));
+                        if (data.status) {
+                            $('.reservation').show();
+                        }
+                        $('.events').show();
+                        if (usePricing) {
+                            calcPrice();
+                        } else {
+                            $('.price').hide();
+                        }
+                    });
+                }
+            });
+
+            function calcPrice() {
+                const startDate = parseDate($('[name="startDate"]').val() + ' ' + $('[name="startTime"]').val());
+                const endDate = parseDate($('[name="endDate"]').val() + ' ' + $('[name="endTime"]').val());
+                const startTime = $('[name="startTime"]').val().split(':');
+                const endTime = $('[name="endTime"]').val().split(':');
+                let price = 0;
+
+                if ($('[name="startDate"]').val() === $('[name="endDate"]').val()) {
+                    price = calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTime[0] + '.' + startTime[1]), parseFloat(startTime[0] + '.' + startTime[1]));
+                } else {
+                    price = calcDay(parseFloat(endTimeLimit) - parseFloat(startTime[0] + '.' + startTime[1]), parseFloat(startTime[0] + '.' + startTime[1]));
+                    price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTimeLimit), parseFloat(startTimeLimit));
+                    price += (Math.round(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24)) - 2) * dayPrice;
+                }
+
+                $('.price .value').html(price.toLocaleString('de-DE'));
+                $('.price').show();
+            }
+
+            function calcDay(duration, startTime) {
+                const rest = duration % 1;
+                let price = 0;
+                if (rest !== 0 && useHalfHour) {
+                    price += halfHourPrice;
+                } else if (rest !== 0 && !useHalfHour) {
+                    price += hourPrice;
+                }
+
+                if (duration >= 8) {
+                    price += dayPrice;
+                } else if (useHalfDay && duration < 8 && duration > 5) {
+                    price += halfDayPrice + (duration - 5 - rest) * hourPrice;
+                } else if (useHalfDay && duration === 5) {
+                    price += halfDayPrice;
+                } else {
+                    price += (duration - rest) * hourPrice;
+                }
+
+                if (useEvening && startTime >= eveningStart && price > eveningPrice) {
+                    price = eveningPrice;
+                }
+
+                return price;
+            }
+
+            $('.events, .price, .booking, .reservation, .repeatTimes').hide();
+        });
+    </script>
+{% endblock %}

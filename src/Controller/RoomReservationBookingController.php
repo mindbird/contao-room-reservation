@@ -15,6 +15,7 @@ use Contao\Controller;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Routing\ContentUrlGenerator;
+use Contao\CoreBundle\Twig\FragmentTemplate;
 use Contao\FrontendUser;
 use Contao\Input;
 use Contao\ModuleModel;
@@ -42,7 +43,7 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
         $this->contentUrlGenerator = $contentUrlGenerator;
     }
 
-    protected function getResponse(Template $template, ModuleModel $model, Request $request): ?Response
+    protected function getResponse(FragmentTemplate $template, ModuleModel $model, Request $request): Response
     {
         $GLOBALS['TL_CSS'][] = 'bundles/contaoroomreservation/css/datepicker.min.css|screen|static';
         $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
