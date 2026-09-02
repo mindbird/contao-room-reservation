@@ -35,7 +35,7 @@
     {% endif %}
 
     <script>
-        $(function () {
+        document.addEventListener('DOMContentLoaded', () => {
             const minBookingTime = parseInt({{ minBookingTime|json_encode|raw }});
             const roomId = {{ roomId|json_encode|raw }};
             const timeBetweenEntries = {{ timeBetweenEntries|json_encode|raw }};
@@ -51,78 +51,100 @@
             const eveningStart = parseFloat({{ eveningStart|json_encode|raw }});
             const startTimeLimit = {{ startTime|json_encode|raw }};
             const endTimeLimit = {{ endTime|json_encode|raw }};
-            const form = $('.room-reservation')[0];
-            const startDateInput = $('[name=startDate]');
-            const startTimeInput = $('[name=startTime]');
-            const endDateInput = $('[name=endDate]');
-            const endTimeInput = $('[name=endTime]');
-            const repeatInput = $('[name=repeat][type=checkbox]');
-            const repeatTimesInput = $('[name=repeatTimes]');
+            const form = document.querySelector('.room-reservation');
+            const startDateInput = form.elements.startDate;
+            const startTimeInput = form.elements.startTime;
+            const endDateInput = form.elements.endDate;
+            const endTimeInput = form.elements.endTime;
+            const repeatInput = form.querySelector('[name=repeat][type=checkbox]');
+            const repeatTimesInput = form.elements.repeatTimes;
+            const repeatTimes = form.querySelector('.repeatTimes');
+            const events = form.querySelector('.events');
+            const booking = form.querySelector('.booking');
+            const reservation = form.querySelector('.reservation');
+            const eventsTableBody = events.querySelector('tbody');
+            const calcPriceButton = form.querySelector('#calcPrice');
+
+            function timeToDecimal(value) {
+                const [hours, minutes] = value.split(':').map(Number);
+
+                return hours + minutes / 60;
+            }
+
+            function setPriceVisibility(visible) {
+                form.querySelectorAll('.price').forEach((element) => {
+                    element.hidden = !visible;
+                });
+            }
 
             function updateEndTime() {
-                const value = startTimeInput.val();
-                const startValue = parseFloat(value[0] + value[1]) + parseFloat(value[3] + value[4]) / 60;
-                endTimeInput.find('option').each(function () {
-                    if ($(this).val()[4] !== value[4]) {
-                        $(this).hide().prop('disabled', true);
+                const value = startTimeInput.value;
+                const startValue = timeToDecimal(value);
+                for (const option of endTimeInput.options) {
+                    if (option.value[4] !== value[4]) {
+                        option.hidden = true;
+                        option.disabled = true;
                     } else {
-                        const endValue = parseFloat($(this).val()[0] + $(this).val()[1]) + parseFloat($(this).val()[3] + $(this).val()[4]) / 60;
+                        const endValue = timeToDecimal(option.value);
                         const difference = endValue - startValue - parseFloat(minBookingTime / 60);
-                        if (startDateInput.val() === endDateInput.val() && difference < 0) {
-                            $(this).hide().prop('disabled', true);
+                        if (startDateInput.value === endDateInput.value && difference < 0) {
+                            option.hidden = true;
+                            option.disabled = true;
                         } else {
-                            $(this).show().prop('disabled', false);
+                            option.hidden = false;
+                            option.disabled = false;
                         }
                     }
-                });
-                endTimeInput.val('');
+                }
+                endTimeInput.value = '';
             }
 
             function validateBookingPeriod() {
-                endDateInput[0].setCustomValidity('');
-                endTimeInput[0].setCustomValidity('');
+                endDateInput.setCustomValidity('');
+                endTimeInput.setCustomValidity('');
 
-                if (startDateInput.val() && endDateInput.val() && endDateInput.val() < startDateInput.val()) {
-                    endDateInput[0].setCustomValidity('Das Enddatum muss am oder nach dem Startdatum liegen.');
+                if (startDateInput.value && endDateInput.value && endDateInput.value < startDateInput.value) {
+                    endDateInput.setCustomValidity('Das Enddatum muss am oder nach dem Startdatum liegen.');
                     return;
                 }
 
-                if (startDateInput.val() && startTimeInput.val() && endDateInput.val() && endTimeInput.val()) {
-                    const start = new Date(startDateInput.val() + 'T' + startTimeInput.val());
-                    const end = new Date(endDateInput.val() + 'T' + endTimeInput.val());
+                if (startDateInput.value && startTimeInput.value && endDateInput.value && endTimeInput.value) {
+                    const start = new Date(startDateInput.value + 'T' + startTimeInput.value);
+                    const end = new Date(endDateInput.value + 'T' + endTimeInput.value);
 
                     if (end <= start) {
-                        endTimeInput[0].setCustomValidity('Die Endzeit muss nach der Startzeit liegen.');
+                        endTimeInput.setCustomValidity('Die Endzeit muss nach der Startzeit liegen.');
                     } else if (end - start < minBookingTime * 60 * 1000) {
-                        endTimeInput[0].setCustomValidity('Die Mindestbuchungsdauer wurde nicht erreicht.');
+                        endTimeInput.setCustomValidity('Die Mindestbuchungsdauer wurde nicht erreicht.');
                     }
                 }
             }
 
             function updateRepeatTimes() {
-                const isRepeated = repeatInput.is(':checked');
-                $('.repeatTimes').toggle(isRepeated);
-                repeatTimesInput.prop('disabled', !isRepeated).prop('required', isRepeated);
+                const isRepeated = repeatInput.checked;
+                repeatTimes.hidden = !isRepeated;
+                repeatTimesInput.disabled = !isRepeated;
+                repeatTimesInput.required = isRepeated;
             }
 
-            startDateInput.on('change', function () {
-                endDateInput.attr('min', startDateInput.val());
-                if (endDateInput.val() < startDateInput.val()) {
-                    endDateInput.val(startDateInput.val());
+            startDateInput.addEventListener('change', () => {
+                endDateInput.min = startDateInput.value;
+                if (endDateInput.value < startDateInput.value) {
+                    endDateInput.value = startDateInput.value;
                 }
                 updateEndTime();
                 validateBookingPeriod();
             });
-            endDateInput.on('change', function () {
+            endDateInput.addEventListener('change', () => {
                 updateEndTime();
                 validateBookingPeriod();
             });
-            startTimeInput.on('change', function () {
+            startTimeInput.addEventListener('change', () => {
                 updateEndTime();
                 validateBookingPeriod();
             });
-            endTimeInput.on('change', validateBookingPeriod);
-            repeatInput.on('change', updateRepeatTimes);
+            endTimeInput.addEventListener('change', validateBookingPeriod);
+            repeatInput.addEventListener('change', updateRepeatTimes);
 
             form.addEventListener('submit', function (event) {
                 validateBookingPeriod();
@@ -136,51 +158,53 @@
             updateRepeatTimes();
             validateBookingPeriod();
 
-            $('#calcPrice').click(function (event) {
+            calcPriceButton.addEventListener('click', async (event) => {
                 event.preventDefault();
-                $('.events, .booking, .reservation').hide();
+                events.hidden = true;
+                booking.hidden = true;
+                reservation.hidden = true;
                 validateBookingPeriod();
                 if (form.reportValidity()) {
-                    $.ajax({
+                    const response = await fetch('/_room_reservation/availability', {
                         method: 'POST',
-                        dataType: 'json',
-                        url: '/_room_reservation/availability',
-                        data: {
-                            FORM_SUBMIT: $('[name=FORM_SUBMIT]').val(),
-                            REQUEST_TOKEN: $('[name=REQUEST_TOKEN]').val(),
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                        body: new URLSearchParams({
+                            FORM_SUBMIT: form.elements.FORM_SUBMIT.value,
+                            REQUEST_TOKEN: form.elements.REQUEST_TOKEN.value,
                             action: 'checkAvailability',
-                            startDate: $('[name=startDate]').val(),
-                            startTime: $('[name=startTime]').val(),
-                            endDate: $('[name=endDate]').val(),
-                            endTime: $('[name=endTime]').val(),
-                            repeat: repeatInput.is(':checked') ? repeatTimesInput.val() : 0,
+                            startDate: startDateInput.value,
+                            startTime: startTimeInput.value,
+                            endDate: endDateInput.value,
+                            endTime: endTimeInput.value,
+                            repeat: repeatInput.checked ? repeatTimesInput.value : 0,
                             roomId: roomId,
                             timeBetweenEntries: timeBetweenEntries,
                             minBookingTime: minBookingTime
-                        }
-                    }).done(function (data) {
-                        $('.events table tbody').html(data.events.join('<br>'));
+                        })
+                    });
+                    const data = await response.json();
+
+                    eventsTableBody.innerHTML = data.events.join('');
                         if (data.status) {
-                            $('.reservation').show();
+                            reservation.hidden = false;
                         }
-                        $('.events').show();
+                        events.hidden = false;
                         if (usePricing) {
                             calcPrice();
                         } else {
-                            $('.price').hide();
+                            setPriceVisibility(false);
                         }
-                    });
                 }
             });
 
             function calcPrice() {
-                const startDate = new Date(startDateInput.val() + 'T' + startTimeInput.val());
-                const endDate = new Date(endDateInput.val() + 'T' + endTimeInput.val());
-                const startTime = $('[name="startTime"]').val().split(':');
-                const endTime = $('[name="endTime"]').val().split(':');
+                const startDate = new Date(startDateInput.value + 'T' + startTimeInput.value);
+                const endDate = new Date(endDateInput.value + 'T' + endTimeInput.value);
+                const startTime = startTimeInput.value.split(':');
+                const endTime = endTimeInput.value.split(':');
                 let price = 0;
 
-                if ($('[name="startDate"]').val() === $('[name="endDate"]').val()) {
+                if (startDateInput.value === endDateInput.value) {
                     price = calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTime[0] + '.' + startTime[1]), parseFloat(startTime[0] + '.' + startTime[1]));
                 } else {
                     price = calcDay(parseFloat(endTimeLimit) - parseFloat(startTime[0] + '.' + startTime[1]), parseFloat(startTime[0] + '.' + startTime[1]));
@@ -188,8 +212,10 @@
                     price += (Math.round(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24)) - 2) * dayPrice;
                 }
 
-                $('.price .value').html(price.toLocaleString('de-DE'));
-                $('.price').show();
+                eventsTableBody.querySelectorAll('.price .value').forEach((element) => {
+                    element.textContent = price.toLocaleString('de-DE');
+                });
+                setPriceVisibility(true);
             }
 
             function calcDay(duration, startTime) {
@@ -218,7 +244,10 @@
                 return price;
             }
 
-            $('.events, .price, .booking, .reservation').hide();
+            events.hidden = true;
+            setPriceVisibility(false);
+            booking.hidden = true;
+            reservation.hidden = true;
         });
     </script>
 {% endblock %}
