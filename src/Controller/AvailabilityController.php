@@ -33,7 +33,8 @@ class AvailabilityController extends AbstractFragmentController
             (string) Input::post('endDate'),
             (string) Input::post('endTime'),
             (int) Input::post('roomId'),
-            (int) Input::post('timeBetweenEntries')
+            (int) Input::post('timeBetweenEntries'),
+            (int) Input::post('minBookingTime')
         ));
 
     }

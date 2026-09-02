@@ -22,6 +22,7 @@
         .addClass('password', this.hideInput|default)
         .addClass(this.class|default)
         .set('value', this.value|default)
+        .set('min', this.minDate|default)
         .mergeWith(getAttributes.invoke())
     }}>
     <div class="error">{{ getErrorAsString.invoke() }}</div>

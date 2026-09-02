@@ -11,7 +11,6 @@
 namespace Mindbird\Contao\RoomReservation\Controller;
 
 use Contao\CalendarEventsModel;
-use Contao\Controller;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Routing\ContentUrlGenerator;
@@ -20,7 +19,6 @@ use Contao\FrontendUser;
 use Contao\Input;
 use Contao\ModuleModel;
 use Contao\PageModel;
-use Contao\Template;
 use DateInterval;
 use DateTime;
 use Mindbird\Contao\RoomReservation\Service\BookingService;
@@ -45,23 +43,6 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
 
     protected function getResponse(FragmentTemplate $template, ModuleModel $model, Request $request): Response
     {
-        $GLOBALS['TL_CSS'][] = 'bundles/contaoroomreservation/css/datepicker.min.css|screen|static';
-        $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
-            Controller::addAssetsUrlTo('bundles/contaoroomreservation/js/datepicker.min.js'),
-            false,
-            true
-        );
-        $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
-            Controller::addAssetsUrlTo('bundles/contaoroomreservation/js/datepicker-de.js'),
-            false,
-            true
-        );
-        $GLOBALS['TL_BODY'][] = Template::generateScriptTag(
-            Controller::addAssetsUrlTo('bundles/contaoroomreservation/js/jquery.validate.js'),
-            false,
-            true
-        );
-
         $template->fields = $this->bookingService->initFields(
             $model->id,
             $model->room_reservation_start_time,
@@ -73,12 +54,17 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
         $user = FrontendUser::getInstance();
         if ('room_reservation_booking_'.$model->id === Input::post('FORM_SUBMIT')) {
             $repeat = 0;
-            if (Input::post('repeatTimes') > 0) {
+            if ('1' === Input::post('repeat')) {
                 $repeat = (int) Input::post('repeatTimes');
+
+                if ($repeat < 1) {
+                    throw new BadRequestHttpException('Invalid number of repeated reservations.');
+                }
             }
 
             $startDate = $this->createDateTime((string) Input::post('startDate'), (string) Input::post('startTime'));
             $endDate = $this->createDateTime((string) Input::post('endDate'), (string) Input::post('endTime'));
+            $this->bookingService->validateBookingPeriod($startDate, $endDate, (int) $model->room_reservation_min_booking_time);
 
             for ($i = 0; $i <= $repeat; ++$i) {
                 $addInterval = new DateInterval('P'.(7 * $i).'D');
@@ -150,7 +136,7 @@ class RoomReservationBookingController extends AbstractFrontendModuleController
 
     private function createDateTime(string $date, string $time): DateTime
     {
-        $dateTime = DateTime::createFromFormat('!d.m.Y H:i', $date.' '.$time);
+        $dateTime = DateTime::createFromFormat('!Y-m-d H:i', $date.' '.$time);
         $errors = DateTime::getLastErrors();
 
         if (false === $dateTime || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count']))) {

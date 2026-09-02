@@ -21,7 +21,7 @@ use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class BookingService
 {
@@ -44,8 +44,6 @@ class BookingService
      * @param $endTime
      * @param $roomEventArchiveId
      *
-     * @throws Exception
-     *
      * @TODO Refactor return message
      */
     public function checkAvailabilityAjax(
@@ -55,7 +53,8 @@ class BookingService
         string $endDate,
         string $endTime,
         int $roomEventArchiveId,
-        int $timeBetweenEntries
+        int $timeBetweenEntries,
+        int $minBookingTime
     ): array
     {
         $events = [];
@@ -67,6 +66,7 @@ class BookingService
             $startDateTime->add($addInterval);
             $endDateTime = $this->createDateTime($endDate, $endTime);
             $endDateTime->add($addInterval);
+            $this->validateBookingPeriod($startDateTime, $endDateTime, $minBookingTime);
             $availabilityEvent = '<tr><td>'.$startDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']).'</td><td>'.$endDateTime->format($GLOBALS['TL_CONFIG']['datimFormat']).'</td><td class="price"><span class="value"></span>,00 EUR</td><td>';
             if (!$this->checkAvailability($startDateTime, $endDateTime, $roomEventArchiveId, $timeBetweenEntries)) {
                 $availabilityEvent .= '<span class="error">nicht verfügbar</span>';
@@ -105,17 +105,24 @@ class BookingService
         return false === $result->fetchOne();
     }
 
+    public function validateBookingPeriod(DateTimeInterface $startDate, DateTimeInterface $endDate, int $minBookingTime): void
+    {
+        if ($endDate <= $startDate) {
+            throw new BadRequestHttpException('The reservation end must be after its start.');
+        }
+
+        if ($endDate->getTimestamp() - $startDate->getTimestamp() < $minBookingTime * 60) {
+            throw new BadRequestHttpException('The reservation is shorter than the minimum booking time.');
+        }
+    }
+
     public function initFields($moduleId, $startTime, $endTime, $minBookingTime, $pageAgbId): array
     {
 
         $fields = [];
 
-        $date = Input::get('date');
-        if ('' !== $date) {
-            $date = substr(Input::get('date'), 6, 2).'.'
-                .substr(Input::get('date'), 4, 2).'.'
-                .substr(Input::get('date'), 0, 4);
-        }
+        $date = (string) Input::get('date');
+        $date = preg_match('/^\d{8}$/', $date) ? substr($date, 0, 4).'-'.substr($date, 4, 2).'-'.substr($date, 6, 2) : date('Y-m-d');
 
         $field = new FormHidden();
         $field->name = 'FORM_SUBMIT';
@@ -135,8 +142,10 @@ class BookingService
         $field->name = 'startDate';
         $field->id = 'startDate';
         $field->label = 'Startdatum';
+        $field->type = 'date';
+        $field->minDate = date('Y-m-d');
         $field->mandatory = true;
-        $field->value = '' === $date ? date('d.m.Y') : $date;
+        $field->value = $date;
         $fields['startDate'] = $field;
 
         $timeslot = [];
@@ -168,8 +177,10 @@ class BookingService
         $field->name = 'endDate';
         $field->id = 'endDate';
         $field->label = 'Enddatum';
+        $field->type = 'date';
+        $field->minDate = date('Y-m-d');
         $field->mandatory = true;
-        $field->value = '' === $date ? date('d.m.Y') : $date;
+        $field->value = $date;
         $fields['endDate'] = $field;
 
         $field = new FormSelect();
@@ -197,8 +208,11 @@ class BookingService
         $field->name = 'repeatTimes';
         $field->id = 'repeatTimes';
         $field->label = 'Wie viele Wochen soll der Termin wiederholt werden?';
-        $field->mandatory = true;
-        $field->value = Input::post('repeatTimes') > 0 ? Input::post('repeatTimes') : 0;
+        $field->type = 'number';
+        $field->rgxp = 'digit';
+        $field->min = 1;
+        $field->step = 1;
+        $field->value = Input::post('repeatTimes') > 0 ? Input::post('repeatTimes') : 1;
         $fields['repeatTimes'] = $field;
 
         /** @var PageModel $pageAgbModel */
@@ -225,11 +239,11 @@ class BookingService
 
     private function createDateTime(string $date, string $time): DateTime
     {
-        $dateTime = DateTime::createFromFormat('!d.m.Y H:i', $date.' '.$time);
+        $dateTime = DateTime::createFromFormat('!Y-m-d H:i', $date.' '.$time);
         $errors = DateTime::getLastErrors();
 
         if (false === $dateTime || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count']))) {
-            throw new Exception('Invalid reservation date or time.');
+            throw new BadRequestHttpException('Invalid reservation date or time.');
         }
 
         return $dateTime;
