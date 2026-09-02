@@ -2,8 +2,11 @@
 
 namespace Mindbird\Contao\RoomReservation\Dca;
 
+use Contao\System;
 use DateInterval;
 use DateTime;
+use Mindbird\Contao\RoomReservation\NotificationType\RoomReservationNotificationType;
+use Terminal42\NotificationCenterBundle\NotificationCenter;
 
 class Module
 {
@@ -20,5 +23,12 @@ class Module
         }
 
         return $timeslot;
+    }
+
+    public function optionsCallbackNotifications(): array
+    {
+        return System::getContainer()
+            ->get(NotificationCenter::class)
+            ->getNotificationsForNotificationType(RoomReservationNotificationType::NAME);
     }
 }

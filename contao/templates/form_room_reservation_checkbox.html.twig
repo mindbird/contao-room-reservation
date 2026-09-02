@@ -1,0 +1,33 @@
+{% extends '@Contao/form_row.html.twig' %}
+
+{% block field %}
+    <div class="formElement checkbox_container{% if this.class|default %} {{ this.class|default }}{% endif %} field" id="ctrl_{{ this.id }}">
+        {% if this.label %}
+            <label>{{ this.label|insert_tag_raw }}</label>
+        {% endif %}
+
+        {% if hasErrors.invoke() %}
+            <p class="error">{{ getErrorAsString.invoke() }}</p>
+        {% endif %}
+
+        <input type="hidden" name="{{ this.name }}" value="">
+
+        {% for option in getOptions.invoke() %}
+            {% if option.type == 'option' %}
+                <div>
+                    <input{{ attrs()
+                        .set('type', 'checkbox')
+                        .set('name', option.name)
+                        .set('id', "opt_#{option.id}")
+                        .addClass('checkbox')
+                        .set('value', option.value)
+                        .set('checked', option.checked, option.checked)
+                        .mergeWith(option.attributes)
+                    }}>
+                    <label for="opt_{{ option.id }}" id="lbl_{{ option.id }}">{{ option.label|sanitize_html('contao')|insert_tag_raw }}</label>
+                </div>
+            {% endif %}
+        {% endfor %}
+        <div class="error">{{ getErrorAsString.invoke() }}</div>
+    </div>
+{% endblock %}

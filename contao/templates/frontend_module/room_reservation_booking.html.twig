@@ -1,0 +1,253 @@
+{% extends '@Contao/frontend_module/_base.html.twig' %}
+
+{% block content %}
+    <form class="room-reservation" method="post">
+        {{ fields.formSubmit.parse()|raw }}
+        <input name="REQUEST_TOKEN" type="hidden" value="{{ contao.request_token }}">
+        <div class="row"><div class="column">{{ fields.eventTitle.parse()|raw }}</div></div>
+        <div class="row">
+            <div class="column">{{ fields.startDate.parse()|raw }}</div>
+            <div class="column">{{ fields.startTime.parse()|raw }}</div>
+        </div>
+        <div class="row">
+            <div class="column">{{ fields.endDate.parse()|raw }}</div>
+            <div class="column">{{ fields.endTime.parse()|raw }}</div>
+        </div>
+        <div class="row">
+            <div class="column">{{ fields.repeat.parse()|raw }}</div>
+            <div class="column repeatTimes">{{ fields.repeatTimes.parse()|raw }}</div>
+        </div>
+        <div class="row"><div class="column"><button id="calcPrice">Verfügbarkeit prüfen</button></div><div class="column"></div></div>
+        <div class="row events">
+            <div class="column">
+                <table>
+                    <thead><tr><td>Start</td><td>Ende</td><td class="price">Preis</td><td>Status</td></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row booking"><div class="column">{{ fields.agb.parse()|raw }}</div></div>
+        <div class="row reservation"><div class="column"><button type="submit">Reservieren</button></div><div class="column"></div></div>
+    </form>
+
+    {% if noTimeslotAvailable|default %}
+        <p>In dem angegebenen Zeitraum ist kein freier Raum verfügbar.</p>
+    {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const minBookingTime = parseInt({{ minBookingTime|json_encode|raw }});
+            const roomId = {{ roomId|json_encode|raw }};
+            const timeBetweenEntries = {{ timeBetweenEntries|json_encode|raw }};
+            const usePricing = parseInt({{ usePricing|json_encode|raw }});
+            const dayPrice = parseFloat({{ priceDay|json_encode|raw }});
+            const useHalfDay = parseInt({{ useHalfDay|json_encode|raw }});
+            const halfDayPrice = parseFloat({{ priceHalfDay|json_encode|raw }});
+            const hourPrice = parseFloat({{ priceHour|json_encode|raw }});
+            const useHalfHour = parseInt({{ useHalfHour|json_encode|raw }});
+            const halfHourPrice = parseFloat({{ priceHalfHour|json_encode|raw }});
+            const useEvening = parseInt({{ useEvening|json_encode|raw }});
+            const eveningPrice = parseFloat({{ priceEvening|json_encode|raw }});
+            const eveningStart = parseFloat({{ eveningStart|json_encode|raw }});
+            const startTimeLimit = {{ startTime|json_encode|raw }};
+            const endTimeLimit = {{ endTime|json_encode|raw }};
+            const form = document.querySelector('.room-reservation');
+            const startDateInput = form.elements.startDate;
+            const startTimeInput = form.elements.startTime;
+            const endDateInput = form.elements.endDate;
+            const endTimeInput = form.elements.endTime;
+            const repeatInput = form.querySelector('[name=repeat][type=checkbox]');
+            const repeatTimesInput = form.elements.repeatTimes;
+            const repeatTimes = form.querySelector('.repeatTimes');
+            const events = form.querySelector('.events');
+            const booking = form.querySelector('.booking');
+            const reservation = form.querySelector('.reservation');
+            const eventsTableBody = events.querySelector('tbody');
+            const calcPriceButton = form.querySelector('#calcPrice');
+
+            function timeToDecimal(value) {
+                const [hours, minutes] = value.split(':').map(Number);
+
+                return hours + minutes / 60;
+            }
+
+            function setPriceVisibility(visible) {
+                form.querySelectorAll('.price').forEach((element) => {
+                    element.hidden = !visible;
+                });
+            }
+
+            function updateEndTime() {
+                const value = startTimeInput.value;
+                const startValue = timeToDecimal(value);
+                for (const option of endTimeInput.options) {
+                    if (option.value[4] !== value[4]) {
+                        option.hidden = true;
+                        option.disabled = true;
+                    } else {
+                        const endValue = timeToDecimal(option.value);
+                        const difference = endValue - startValue - parseFloat(minBookingTime / 60);
+                        if (startDateInput.value === endDateInput.value && difference < 0) {
+                            option.hidden = true;
+                            option.disabled = true;
+                        } else {
+                            option.hidden = false;
+                            option.disabled = false;
+                        }
+                    }
+                }
+                endTimeInput.value = '';
+            }
+
+            function validateBookingPeriod() {
+                endDateInput.setCustomValidity('');
+                endTimeInput.setCustomValidity('');
+
+                if (startDateInput.value && endDateInput.value && endDateInput.value < startDateInput.value) {
+                    endDateInput.setCustomValidity('Das Enddatum muss am oder nach dem Startdatum liegen.');
+                    return;
+                }
+
+                if (startDateInput.value && startTimeInput.value && endDateInput.value && endTimeInput.value) {
+                    const start = new Date(startDateInput.value + 'T' + startTimeInput.value);
+                    const end = new Date(endDateInput.value + 'T' + endTimeInput.value);
+
+                    if (end <= start) {
+                        endTimeInput.setCustomValidity('Die Endzeit muss nach der Startzeit liegen.');
+                    } else if (end - start < minBookingTime * 60 * 1000) {
+                        endTimeInput.setCustomValidity('Die Mindestbuchungsdauer wurde nicht erreicht.');
+                    }
+                }
+            }
+
+            function updateRepeatTimes() {
+                const isRepeated = repeatInput.checked;
+                repeatTimes.hidden = !isRepeated;
+                repeatTimesInput.disabled = !isRepeated;
+                repeatTimesInput.required = isRepeated;
+            }
+
+            startDateInput.addEventListener('change', () => {
+                endDateInput.min = startDateInput.value;
+                if (endDateInput.value < startDateInput.value) {
+                    endDateInput.value = startDateInput.value;
+                }
+                updateEndTime();
+                validateBookingPeriod();
+            });
+            endDateInput.addEventListener('change', () => {
+                updateEndTime();
+                validateBookingPeriod();
+            });
+            startTimeInput.addEventListener('change', () => {
+                updateEndTime();
+                validateBookingPeriod();
+            });
+            endTimeInput.addEventListener('change', validateBookingPeriod);
+            repeatInput.addEventListener('change', updateRepeatTimes);
+
+            form.addEventListener('submit', function (event) {
+                validateBookingPeriod();
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    form.reportValidity();
+                }
+            });
+
+            updateEndTime();
+            updateRepeatTimes();
+            validateBookingPeriod();
+
+            calcPriceButton.addEventListener('click', async (event) => {
+                event.preventDefault();
+                events.hidden = true;
+                booking.hidden = true;
+                reservation.hidden = true;
+                validateBookingPeriod();
+                if (form.reportValidity()) {
+                    const response = await fetch('/_room_reservation/availability', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                        body: new URLSearchParams({
+                            FORM_SUBMIT: form.elements.FORM_SUBMIT.value,
+                            REQUEST_TOKEN: form.elements.REQUEST_TOKEN.value,
+                            action: 'checkAvailability',
+                            startDate: startDateInput.value,
+                            startTime: startTimeInput.value,
+                            endDate: endDateInput.value,
+                            endTime: endTimeInput.value,
+                            repeat: repeatInput.checked ? repeatTimesInput.value : 0,
+                            roomId: roomId,
+                            timeBetweenEntries: timeBetweenEntries,
+                            minBookingTime: minBookingTime
+                        })
+                    });
+                    const data = await response.json();
+
+                    eventsTableBody.innerHTML = data.events.join('');
+                        if (data.status) {
+                            reservation.hidden = false;
+                        }
+                        events.hidden = false;
+                        if (usePricing) {
+                            calcPrice();
+                        } else {
+                            setPriceVisibility(false);
+                        }
+                }
+            });
+
+            function calcPrice() {
+                const startDate = new Date(startDateInput.value + 'T' + startTimeInput.value);
+                const endDate = new Date(endDateInput.value + 'T' + endTimeInput.value);
+                const startTime = startTimeInput.value.split(':');
+                const endTime = endTimeInput.value.split(':');
+                let price = 0;
+
+                if (startDateInput.value === endDateInput.value) {
+                    price = calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTime[0] + '.' + startTime[1]), parseFloat(startTime[0] + '.' + startTime[1]));
+                } else {
+                    price = calcDay(parseFloat(endTimeLimit) - parseFloat(startTime[0] + '.' + startTime[1]), parseFloat(startTime[0] + '.' + startTime[1]));
+                    price += calcDay(parseFloat(endTime[0] + '.' + endTime[1]) - parseFloat(startTimeLimit), parseFloat(startTimeLimit));
+                    price += (Math.round(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24)) - 2) * dayPrice;
+                }
+
+                eventsTableBody.querySelectorAll('.price .value').forEach((element) => {
+                    element.textContent = price.toLocaleString('de-DE');
+                });
+                setPriceVisibility(true);
+            }
+
+            function calcDay(duration, startTime) {
+                const rest = duration % 1;
+                let price = 0;
+                if (rest !== 0 && useHalfHour) {
+                    price += halfHourPrice;
+                } else if (rest !== 0 && !useHalfHour) {
+                    price += hourPrice;
+                }
+
+                if (duration >= 8) {
+                    price += dayPrice;
+                } else if (useHalfDay && duration < 8 && duration > 5) {
+                    price += halfDayPrice + (duration - 5 - rest) * hourPrice;
+                } else if (useHalfDay && duration === 5) {
+                    price += halfDayPrice;
+                } else {
+                    price += (duration - rest) * hourPrice;
+                }
+
+                if (useEvening && startTime >= eveningStart && price > eveningPrice) {
+                    price = eveningPrice;
+                }
+
+                return price;
+            }
+
+            events.hidden = true;
+            setPriceVisibility(false);
+            booking.hidden = true;
+            reservation.hidden = true;
+        });
+    </script>
+{% endblock %}

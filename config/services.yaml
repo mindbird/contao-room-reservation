@@ -3,6 +3,8 @@ services:
   Mindbird\Contao\RoomReservation\Controller\RoomReservationBookingController:
     arguments:
       - "@mindbird.contao.booking_service"
+      - '@Terminal42\NotificationCenterBundle\NotificationCenter'
+      - '@Contao\CoreBundle\Routing\ContentUrlGenerator'
     tags:
       - { name: contao.frontend_module, category: miscellaneous }
 
@@ -16,5 +18,12 @@ services:
     class: Mindbird\Contao\RoomReservation\Service\BookingService
     arguments:
       - '@doctrine.orm.entity_manager'
+      - '@Contao\CoreBundle\Routing\ContentUrlGenerator'
 
   Mindbird\Contao\RoomReservation\Service\BookingService: '@mindbird.contao.booking_service'
+
+  Mindbird\Contao\RoomReservation\NotificationType\RoomReservationNotificationType:
+    arguments:
+      - '@Terminal42\NotificationCenterBundle\Token\Definition\Factory\TokenDefinitionFactoryInterface'
+    tags:
+      - { name: notification_center.notification_type }

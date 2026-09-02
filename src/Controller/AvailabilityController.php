@@ -27,12 +27,14 @@ class AvailabilityController extends AbstractFragmentController
     public function checkAvailability(): JsonResponse
     {
         return new JsonResponse($this->bookingService->checkAvailabilityAjax(
-            Input::post('repeat'),
-            Input::post('startDate'),
-            Input::post('startTime'),
-            Input::post('endDate'),
-            Input::post('endTime'),
-            Input::post('roomId')
+            (int) Input::post('repeat'),
+            (string) Input::post('startDate'),
+            (string) Input::post('startTime'),
+            (string) Input::post('endDate'),
+            (string) Input::post('endTime'),
+            (int) Input::post('roomId'),
+            (int) Input::post('timeBetweenEntries'),
+            (int) Input::post('minBookingTime')
         ));
 
     }
