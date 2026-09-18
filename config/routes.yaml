@@ -5,4 +5,3 @@ frontend_room_reservation:
     _scope: frontend
     _token_check: true
   methods: [POST]
-

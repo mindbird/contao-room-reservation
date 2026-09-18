@@ -16,17 +16,11 @@
     }
   ],
   "require": {
-    "php": "^7.2",
-    "contao/core-bundle": "^4.9",
-    "contao/calendar-bundle": "^4.9",
-    "terminal42/notification_center": "~1.5"
-  },
-  "require-dev": {
-    "roave/security-advisories": "dev-master",
+    "php": "^8.3",
+    "contao/core-bundle": "^5.7",
+    "contao/calendar-bundle": "^5.7",
     "contao/manager-plugin": "^2.0",
-    "vimeo/psalm": "^3.9",
-    "friendsofphp/php-cs-fixer": "^2.12",
-    "phan/phan": "^2.6"
+    "terminal42/notification_center": "^2.7"
   },
   "autoload": {
     "psr-4": {
@@ -35,6 +29,12 @@
   },
   "extra": {
     "contao-manager-plugin": "Mindbird\\Contao\\RoomReservation\\ContaoManager\\Plugin"
+  },
+  "config": {
+    "allow-plugins": {
+      "contao-components/installer": true,
+      "contao/manager-plugin": true
+    }
   },
   "prefer-stable": true,
   "support": {
