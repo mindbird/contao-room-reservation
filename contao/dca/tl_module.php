@@ -158,7 +158,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_page_agb'] = [
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['room_reservation_notification'] = [
     'inputType' => 'select',
-    'foreignKey' => 'tl_nc_notification.title',
+    'options_callback' => [\Mindbird\Contao\RoomReservation\Dca\Module::class, 'optionsCallbackNotifications'],
     'eval' => ['includeBlankOption' => true, 'chosen' => true, 'tl_class' => 'clr'],
     'sql' => "int(10) unsigned NOT NULL default '0'"
     ];
