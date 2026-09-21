@@ -1,30 +1,8 @@
-# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
 services:
-  # Frontend modules
-  Mindbird\Contao\RoomReservation\Controller\RoomReservationBookingController:
-    arguments:
-      - "@mindbird.contao.booking_service"
-      - '@Terminal42\NotificationCenterBundle\NotificationCenter'
-      - '@Contao\CoreBundle\Routing\ContentUrlGenerator'
-    tags:
-      - { name: contao.frontend_module, category: miscellaneous }
-
-  Mindbird\Contao\RoomReservation\Controller\AvailabilityController:
+  _defaults:
+    autowire: true
+    autoconfigure: true
     public: true
-    arguments:
-      - "@mindbird.contao.booking_service"
 
-  # Services
-  mindbird.contao.booking_service:
-    class: Mindbird\Contao\RoomReservation\Service\BookingService
-    arguments:
-      - '@doctrine.orm.entity_manager'
-      - '@Contao\CoreBundle\Routing\ContentUrlGenerator'
-
-  Mindbird\Contao\RoomReservation\Service\BookingService: '@mindbird.contao.booking_service'
-
-  Mindbird\Contao\RoomReservation\NotificationType\RoomReservationNotificationType:
-    arguments:
-      - '@Terminal42\NotificationCenterBundle\Token\Definition\Factory\TokenDefinitionFactoryInterface'
-    tags:
-      - { name: notification_center.notification_type }
+  Mindbird\Contao\RoomReservation\:
+    resource: '../src/'
